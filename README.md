@@ -1,4 +1,3 @@
-termiteNest
+charyCUDA
 ===========
-
-CUDA
+Implementation of Smith-Waterman algorithm.
