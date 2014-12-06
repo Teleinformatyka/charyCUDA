@@ -51,24 +51,41 @@ GENCODE_SM50    := -gencode arch=compute_50,code=sm_50
 GENCODE_SMXX    := -gencode arch=compute_50,code=compute_50
 GENCODE_FLAGS   ?= $(GENCODE_SM10) $(GENCODE_SM20) $(GENCODE_SM30) $(GENCODE_SM32) $(GENCODE_SM35) $(GENCODE_SM50) $(GENCODE_SMXX)
 
-CFLAGS = -I. -I$(CUDA_PATH)/include  -std=c++11
+SRC_DIR = src
+OBJ_DIR = obj
+
+CFLAGS = -I$(SRC_DIR) -I$(CUDA_PATH)/include  -std=c++11
 LDFLAGS = -L$(CUDA_PATH)/lib64 -lcudart 
+
+
+SRC = $(shell find $(SRC_DIR)/ -type f -name '*.cpp' -o -name '*.cu')
+OBJ := $(SRC:.cu=.o)
+OBJ := $(OBJ:.cpp=.o)
+OBJ := $(subst $(SRC_DIR), $(OBJ_DIR), $(OBJ))
+
+
 
 all: build
 
 build: chary
 
-kernel.o: kernel.cu
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cu
 	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-main.o: main.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $
 	$(CXX) $(CFLAGS)  -o  $@  -c $?
 
-chary: kernel.o main.o
+chary: $(OBJ)
 	$(CXX) $? -L$(CUDA_PATH)/lib64 -lcudart -lcuda    -o $@
 
+$(OBJ): | $(OBJ_DIR)
+
+
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
+
 clean:
-	rm -f chary main.o kernel.o
+	rm -rf $(OBJ_DIR) chary
 
 doc:
 	pdflatex documentation/dok.tex 
