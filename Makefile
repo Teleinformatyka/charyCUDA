@@ -64,7 +64,7 @@ kernel.o: kernel.cu
 main.o: main.cpp
 	$(CXX) $(CFLAGS)  -o  $@  -c $?
 
-termiteNest: kernel.o main.o
+chary: kernel.o main.o
 	$(CXX) $? -L$(CUDA_PATH)/lib64 -lcudart -lcuda    -o $@
 
 clean:
