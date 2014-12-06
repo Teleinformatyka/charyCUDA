@@ -64,5 +64,8 @@ termiteNest: kernel.o main.o
 clean:
 	rm -f termiteNest  main.o kernel.o
 
+doc:
+	pdflatex documentation/dok.tex 
+
 clobber: clean
 
