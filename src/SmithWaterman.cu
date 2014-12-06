@@ -1,4 +1,4 @@
-#include "SmithWaterman.ch"
+#include "SmithWaterman.h"
 
 #include <cstdio>
 
@@ -21,7 +21,9 @@ SmithWaterman::~SmithWaterman() {
 
 }
 
-void SmithWaterman::search(dim3 grid, dim3 block) {
+void SmithWaterman::search() {
+    dim3 grid( 3 );
+    dim3 block( 3, 32 );
     searchCUDA<<<grid, block>>>();
 }
 

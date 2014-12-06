@@ -12,7 +12,7 @@ class SmithWaterman {
 public:
        __host__ __device__  SmithWaterman (Params &params);
     virtual ~SmithWaterman ();
-    virtual void search(dim3 grid, dim3 block);
+    virtual void search();
 private:
 
 };

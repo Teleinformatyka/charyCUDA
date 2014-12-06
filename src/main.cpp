@@ -6,10 +6,9 @@
 #include <cuda_runtime_api.h>
 
 #include "Params.h"
-#include "SmithWaterman.ch"
+#include "SmithWaterman.h"
 
 
-void cudaWraper(dim3, dim3);
 
 int main(int argc, char **argv) {
     Params params;
@@ -18,11 +17,8 @@ int main(int argc, char **argv) {
     }
 
     auto test = 1;
-    dim3 grid( 3 );
-    dim3 block( 3, 32 );
     SmithWaterman alg{params};
-    alg.search(grid, block);
-    cudaWraper(grid, block);
+    alg.search();
     cudaError_t cudaerr = cudaDeviceSynchronize();
     if (cudaerr) {
         std::cerr<<"kernel launch failed with error "<<cudaGetErrorString(cudaerr);

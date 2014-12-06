@@ -64,10 +64,13 @@ OBJ := $(OBJ:.cpp=.o)
 OBJ := $(subst $(SRC_DIR), $(OBJ_DIR), $(OBJ))
 
 
-
 all: build
 
 build: chary
+
+test: clean  all
+	@echo "Running chary"
+	@./chary data/queryfile data/dbfile
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cu
 	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
@@ -85,7 +88,8 @@ $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
 clean:
-	rm -rf $(OBJ_DIR) chary
+	@echo "Removing object files, dok files and executable file"
+	rm -rf $(OBJ_DIR) chary dok.*
 
 doc:
 	pdflatex documentation/dok.tex 
