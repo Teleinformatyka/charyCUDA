@@ -38,19 +38,25 @@ ALL_CCFLAGS += $(NVCCFLAGS)
 ALL_CCFLAGS += $(EXTRA_NVCCFLAGS)
 ALL_CCFLAGS += $(addprefix -Xcompiler ,$(CCFLAGS))
 ALL_CCFLAGS += $(addprefix -Xcompiler ,$(EXTRA_CCFLAGS))
-ALL_CCFLAGS += $(pkg-config --libs --cflags opencv)
 ALL_LDFLAGS :=
 ALL_LDFLAGS += $(ALL_CCFLAGS)
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
+GENCODE_SM20    := -gencode arch=compute_20,code=sm_20
+GENCODE_SM30    := -gencode arch=compute_30,code=sm_30
+GENCODE_SM32    := -gencode arch=compute_32,code=sm_32
+GENCODE_SM35    := -gencode arch=compute_35,code=sm_35
+GENCODE_SM50    := -gencode arch=compute_50,code=sm_50
+GENCODE_SMXX    := -gencode arch=compute_50,code=compute_50
+GENCODE_FLAGS   ?= $(GENCODE_SM10) $(GENCODE_SM20) $(GENCODE_SM30) $(GENCODE_SM32) $(GENCODE_SM35) $(GENCODE_SM50) $(GENCODE_SMXX)
 
 CFLAGS = -I. -I$(CUDA_PATH)/include  -std=c++11
 LDFLAGS = -L$(CUDA_PATH)/lib64 -lcudart 
 
 all: build
 
-build: termiteNest
+build: chary
 
 kernel.o: kernel.cu
 	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
@@ -58,11 +64,11 @@ kernel.o: kernel.cu
 main.o: main.cpp
 	$(CXX) $(CFLAGS)  -o  $@  -c $?
 
-termiteNest: kernel.o main.o
-	$(CXX) -L$(CUDA_PATH)/lib64 -lcudart -lcuda  $?  -o $@
+chary: kernel.o main.o
+	$(CXX) $? -L$(CUDA_PATH)/lib64 -lcudart -lcuda    -o $@
 
 clean:
-	rm -f termiteNest  main.o kernel.o
+	rm -f chary main.o kernel.o
 
 doc:
 	pdflatex documentation/dok.tex 
