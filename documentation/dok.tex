@@ -140,11 +140,37 @@ Dzięki takiemu przedstawieniu wyników możliwe jest zwrócenie uwagi na fragme
 
 \subsection*{Algorytm Smitha-Watermana w ujęciu sekwencyjnym}
 
-Algorym Smitha-Watermana składa się z się z dwóch etapów:
+Algorym Smitha-Watermana należy do klasy algorytmów dynamicznych. Składa się z się z dwóch etapów:
 \begin{lista}
  \item Tworzenie macierzy podobieństwa
 \item Otwarzanie optymalnej ścieżki (ang. backtracking)
 \end{lista}
+
+W pierwszym etapie zostaje utworzona pusta macierz. Jej wiersze odpowiadają kolejnym znakom pierwszego ciągu, kolumny kolejnym znakom drugiego ciągu. Komórki znajdujące się na przecięcie opisują punktacje określającą w jakim stopniu dopasowanie danych dwóch znaków jest poprawne. 
+
+W celu wypełnienia powyższej macierzy należy zauwazyć, że przy porównywaniu dwóch ciągów można mieć miesce trzy sytuacje przedstawione na poższym schemacie.
+
+\begin{figure}[h]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.6\textwidth]{images/TypySytuacjiPrzyDopasowaniu.png}
+  \end{center}
+  \caption{Możliwe sytacje w trakcie porównywania ciągów: (1 - dopasowanie, 2 - przerwa, 3 - zamiana)}
+ \end{figure}
+
+
+Dwa ciągi są do siebie podobne gdy mamy więcej sytuacji typu 1 ("dopasowanie") niż sytuacji typów 2 ("przerwa"),3 ("zamiana"). W związku z tym spostrzeżeniem w trakcie wypełniania macierzy wartościami będziemy dodatnio punktować "dopasowania", podczas gdy "przerwy" i "zamiany" będę punktowane ujemnie. Dokładne wartości punktacji nie są elementem specyfikacji algorytmu i są dobierane w zależności od rozpatrywanego problemu. Daje to możliwość porównywania ciągów w sposób traktujący "przerwy" mniej restrykcyjnie niż "zamiany" (lub odrotnie). 
+
+\begin{figure}[h]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.6\textwidth]{images/SchematDzialaniaAlgorytmu.png}
+  \end{center}
+  \caption{Pierwsze cztery kroki wykonaniu algorutymy Smitha-Watermana dla danych wejściowych: TGGA, TGA}
+ \end{figure}
+
 
 
 Algorytm bazujący na programowaniu dynamicznym umożliwiający poszukiwanie optymalnych lokalnych dopasowań sekwencji.
