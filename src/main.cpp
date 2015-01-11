@@ -23,6 +23,6 @@ int main(int argc, char **argv) {
         std::cerr<<"kernel launch failed with error "<<cudaGetErrorString(cudaerr);
         return -1;
     }
-    alg.print(0);
+    alg.print();
     return 0;
 }
