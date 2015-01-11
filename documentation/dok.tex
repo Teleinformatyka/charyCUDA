@@ -15,6 +15,7 @@
 \usepackage{wrapfig}
 \usepackage{listings}
 \usepackage{datetime}
+\usepackage{titlesec}
 \renewcommand{\onehalfspacing}{\setstretch{1.6}}
 \geometry{tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
 \setlength{\parindent}{1cm}
@@ -25,6 +26,7 @@
   \setlength{\parskip}{0pt}
   \setlength{\parsep}{0pt}
 }{\end{itemize}}
+\titleformat{\section}[block]{\Large\bfseries\filcenter}{}{1em}{}
 \newcommand{\linia}{\rule{\linewidth}{0.4mm}}
 \definecolor{lbcolor}{rgb}{0.95,0.95,0.95}
 \lstset{
@@ -48,14 +50,14 @@
 \begin{document}
 \noindent
 \begin{tabular}{|c|p{11cm}|c|} \hline 
-Grupa Wtorek 9.15 & Michał Jaworek Marcin Kaciuba & \ddmmyyyydate\today \tabularnewline
+Grupa Wtorek 9.15 & Michał Jaworek, Marcin Kaciuba & \ddmmyyyydate\today \tabularnewline
 \hline 
 \end{tabular}
 
 
 \section*{Algorytm Smitha-Watermana - poszukiwanie optymalnych lokalnych dopasowań sekwencji }
 
-\section*{Algorytm Smitha-Watermana }
+\subsection*{Algorytm Smitha-Watermana }
 Algorytm bazujący na programowaniu dynamicznym umożliwiający poszukiwanie optymalnych lokalnych dopasowań sekwencji.
 Jest często wykorzystywany w bioinformatyce do poszukiwań dopasowań sekwencji nukleotydów i aminokwasów.
 
@@ -63,18 +65,18 @@ Jest często wykorzystywany w bioinformatyce do poszukiwań dopasowań sekwencji
   \vspace{5pt}
   \centering
   \begin{center}
-  \includegraphics[width=0.65\textwidth]{documentation/images/global-local-alignment.png}
+  \includegraphics[width=0.65\textwidth]{images/global-local-alignment.png}
   \end{center}
   \caption{Dopasowanie lokalne a globalne}
  \end{figure}
 Trochę o samym algorytmie... 
 
-\section*{Implementacja algorytmu na GPU}
+\subsection*{Implementacja algorytmu na GPU}
 ...
 
-\section*{Przeprowadzone testy}
+\subsection*{Przeprowadzone testy}
 
-\section*{Wnioski}
+\subsection*{Wnioski}
 
 
 
