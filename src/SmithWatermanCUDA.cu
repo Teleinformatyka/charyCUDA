@@ -1,4 +1,7 @@
 #include <cstdio>
+#include <algorithm>    // std::max
+
+
 
 #include "smith_waterman_params.h"
 
@@ -12,22 +15,12 @@ if ((err = cudaGetLastError()) != cudaSuccess) {    \
 
 
 
-__device__ void get_value(long long match, long long deletion, long long insertion, long long &value, char &direction){
+__device__ void get_value(long long match, long long deletion, long long insertion, long long value, char &direction){
 
-  value = max((long long)0, max(match, max(deletion, insertion)));
-
-  direction = 0;
-
-  if(value == 0){ return; }
-
-  if     (value == match)    { direction = 1; }
-  else if(value == deletion) { direction = 2; }
-  else if(value == insertion){ direction = 3; }
 }
 
 
 __global__ void runCUDA(CUDA& params) {
-    printf("%d", threadIdx.x);
     long long match, deletion, insertion, value;
 
     int id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -38,14 +31,20 @@ __global__ void runCUDA(CUDA& params) {
     char direction;
     bool first=true;
 
-
-
     while(y < end_y && y <= params.rows_count && x >= 0 && x < params.columns_count){
         match = (first == true ? params.column.before_prev : params.column.prev)[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? params.match : params.mismatch);
         deletion = params.column.prev[y] + params.gap_penalty;
         insertion = (first == true ? params.column.prev : params.column.current)[y-1] + params.gap_penalty;
 
-        get_value(match, deletion, insertion, value, direction);
+   value =  max((long long)0, max(match, max(deletion, insertion))); */
+
+  direction = 0;
+
+  if(value == 0){ return; }
+
+  if     (value == match)    { direction = 1; }
+  else if(value == deletion) { direction = 2; }
+  else if(value == insertion){ direction = 3; }
 
         params.column.current[y] = value;
         params.directions[y-1] = direction;
@@ -61,8 +60,15 @@ void searchCUDA(CUDA_params &params) {
   cudaMemcpy( params.cuda.column.before_prev, params.cuda.column.prev, params.cuda.column.size, cudaMemcpyDeviceToDevice );
   cudaMemcpy( params.cuda.column.prev, params.cuda.column.current, params.cuda.column.size, cudaMemcpyDeviceToDevice );
   cudaMemset( params.cuda.column.current, 0, params.cuda.column.size );
+ runCUDA<<<params.cuda.blocks_count, params.cuda.threads_per_block>>>(params.cuda);
+ cudaError_t err;   
+    if ((err = cudaGetLastError()) != cudaSuccess) {    
+            int device;
+        cudaGetDevice(&device);
+    printf("CUDA error on GPU %d: %s : %s, line %d\n", device, cudaGetErrorString(err), __FILE__, __LINE__); 
+    return ;
+    }
 
-  runCUDA<<<params.cuda.blocks_count, params.cuda.threads_per_block>>>(params.cuda);
 
   cudaMemcpy( params.result.directions, params.cuda.directions, params.directions_size, cudaMemcpyDeviceToHost );
   cudaMemcpy( params.result.column, params.cuda.column.current, params.cuda.column.size, cudaMemcpyDeviceToHost );
@@ -75,8 +81,8 @@ void initCUDA(CUDA_params &params) {
     params.cuda.columns_count = params.sequence_1->size;
     params.cuda.rows_count = params.sequence_2->size;
 
-    cudaMalloc( &params.cuda.sequence_1,     params.sequence_1->size );
-    cudaMalloc( &params.cuda.sequence_2,     params.sequence_2->size );
+    cudaMalloc( (void**)&params.cuda.sequence_1,     params.sequence_1->size );
+    cudaMalloc( (void**)&params.cuda.sequence_2,     params.sequence_2->size );
     cudaMalloc( (void**)&params.cuda.column.current, params.cuda.column.size );
     cudaMalloc( (void**)&params.cuda.column.prev,    params.cuda.column.size );
     cudaMalloc( (void**)&params.cuda.column.before_prev, params.cuda.column.size );
