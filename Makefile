@@ -72,6 +72,10 @@ test: clean  all
 	@echo "Running chary"
 	@./chary data/queryfile data/dbfile
 
+test_small: clean  all
+	@echo "Running chary"
+	@./chary data/queryfile_small data/db_file_small
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cu
 	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 

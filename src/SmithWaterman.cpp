@@ -57,7 +57,7 @@ SmithWaterman::SmithWaterman(Params &params)
     m_cudaParams.cuda.gap_penalty = Params::gapPenalty;
 
     m_cudaParams.cuda.cells_per_thread = 64;
-    m_cudaParams.cuda.threads_per_block = 100;
+    m_cudaParams.cuda.threads_per_block = 1024;
     m_cudaParams.cuda.threads_count = ceil((float)m_size_y / (float)m_cudaParams.cuda.cells_per_thread);
     m_cudaParams.cuda.blocks_count = ceil((float)m_cudaParams.cuda.threads_count / (float)m_cudaParams.cuda.threads_per_block);
 
