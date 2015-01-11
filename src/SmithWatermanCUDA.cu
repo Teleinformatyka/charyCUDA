@@ -38,12 +38,23 @@ __global__ void runCUDA(CUDA params, Column column) {
     int end_y = y + params.cells_per_thread;
 
     char direction = 0;
-    bool first=true;
+
+
+    match = column.before_prev[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? params.match : params.mismatch);
+    deletion = column.prev[y] + params.gap_penalty;
+    insertion = column.prev[y-1] + params.gap_penalty;
+
+    get_value(match, deletion, insertion, value, direction);
+
+    column.current[y] = value;
+    params.directions[y-1] = direction;
+
+    y++;
 
     while(y < end_y && y <= params.rows_count && x >= 0 && x < params.columns_count){
-        match = (first == true ? column.before_prev : column.prev)[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? params.match : params.mismatch);
+        match = column.prev[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? params.match : params.mismatch);
         deletion = column.prev[y] + params.gap_penalty;
-        insertion = (first == true ? column.prev : column.current)[y-1] + params.gap_penalty;
+        insertion = column.current[y-1] + params.gap_penalty;
 
         get_value(match, deletion, insertion, value, direction);
 
@@ -51,7 +62,6 @@ __global__ void runCUDA(CUDA params, Column column) {
         params.directions[y-1] = direction;
 
         y++;
-        first = false;
     }
 
 

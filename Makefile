@@ -33,7 +33,7 @@ else
       TARGET := release
 endif
 
-ALL_CCFLAGS :=
+ALL_CCFLAGS := 
 ALL_CCFLAGS += $(NVCCFLAGS)
 ALL_CCFLAGS += $(EXTRA_NVCCFLAGS)
 ALL_CCFLAGS += $(addprefix -Xcompiler ,$(CCFLAGS))
@@ -54,7 +54,7 @@ GENCODE_FLAGS   ?= $(GENCODE_SM20) $(GENCODE_SMXX)
 SRC_DIR = src
 OBJ_DIR = obj
 
-CFLAGS = -I$(SRC_DIR) -I$(CUDA_PATH)/include  -std=c++11
+CFLAGS = -I$(SRC_DIR) -I$(CUDA_PATH)/include  -std=c++11 -O3
 LDFLAGS = -L$(CUDA_PATH)/lib64 -lcudart 
 
 
