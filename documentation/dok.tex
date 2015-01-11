@@ -160,7 +160,14 @@ W celu wypełnienia powyższej macierzy należy zauwazyć, że przy porównywani
  \end{figure}
 
 
-Dwa ciągi są do siebie podobne gdy mamy więcej sytuacji typu 1 ("dopasowanie") niż sytuacji typów 2 ("przerwa"),3 ("zamiana"). W związku z tym spostrzeżeniem w trakcie wypełniania macierzy wartościami będziemy dodatnio punktować "dopasowania", podczas gdy "przerwy" i "zamiany" będę punktowane ujemnie. Dokładne wartości punktacji nie są elementem specyfikacji algorytmu i są dobierane w zależności od rozpatrywanego problemu. Daje to możliwość porównywania ciągów w sposób traktujący "przerwy" mniej restrykcyjnie niż "zamiany" (lub odrotnie). 
+Dwa ciągi są do siebie podobne gdy mamy więcej sytuacji typu 1 ("dopasowanie") niż sytuacji typów 2 ("przerwa"), 3 ("zamiana"). W związku z tym spostrzeżeniem w trakcie wypełniania macierzy wartościami będziemy dodatnio punktować "dopasowania", podczas gdy "przerwy" i "zamiany" będę punktowane ujemnie. Dokładne wartości punktacji nie są elementem specyfikacji algorytmu i są dobierane w zależności od rozpatrywanego problemu. Daje to możliwość porównywania ciągów w sposób traktujący "przerwy" mniej restrykcyjnie niż "zamiany" (lub odrotnie). 
+
+W celu opisy kroków algorytmy posłużono się przykładem. Schemat przedstawiony na rysunku 6. prezentuje pierwsze kroki wykonywane w celu wypełnienia macierzy podobieństwa. Przedstawiono przypadek dla danych wejściowych: TGGA, TGA oraz dla parametrów:
+\begin{lista}
+\item Punktacja za dopasowanie: 5
+\item Punktacja za zamiane: -3
+\item Punktacja za przerwe: -2
+\end{lista}
 
 \begin{figure}[h]
   \vspace{5pt}
@@ -168,17 +175,98 @@ Dwa ciągi są do siebie podobne gdy mamy więcej sytuacji typu 1 ("dopasowanie"
   \begin{center}
   \includegraphics[width=0.6\textwidth]{images/SchematDzialaniaAlgorytmu.png}
   \end{center}
-  \caption{Pierwsze cztery kroki wykonaniu algorutymy Smitha-Watermana dla danych wejściowych: TGGA, TGA}
+  \caption{Pierwsze cztery kroki wykonaniu algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
+ \end{figure}
+
+Na początku macierz wypełniona jest zerami. Należy zwrócić uwagę na istnienie dodatkowego wiersza i kolumny (oznaczone na schematach szarą czcionką). Komórki rozpatrywane są wiersz po wierszy. Dla każdej komórki wykonywana jest sekwencja kroków mająca odpowiedzieć na następujące pytanie: "Przez którego z sąsiadów należy poprowadzić ścieżkę dopasowania tak, żeby w obecnej komórce osiągnąć najlepszy wyniki?". Przy odpowiedzi na to pytanie rozpatrywane są komórki:
+\begin{lista}
+\item Na lewo - odpowiadająca wprowadzeniu przerwy w pierwszym ciągu
+\item Powyżej - odpowiadająca wprowadzeniu przerwy w drugim ciągu
+\item Na skos (powyżej i na lewo) - w zależności od przypadku odpowiadająca wprowadzeniu zamiany lub dopasowania.
+\end{lista}
+
+Tą procedurę można przedstawić w pseudokodzie w następujący sposób. 
+
+\begin{lstlisting}
+	int fromLeft = valueOfCellOnLeft - penaltyForGap;
+	int fromUp = valueOfCellOnUp - penaltyForGap;
+	int fromDiagonal;
+	if(letterInRow == letterInCol){
+		fromDiagonal = valueOfCellInDiagonal + bonusOfMatch;
+	}else{
+		fromDiagonal = valueOfCellInDiagonal + penaltyForReplacement;
+	}
+	int	valueOfThisCell = max(fromLeft, fromUp, fromDiagonal);
+	rememberDecision();
+\end{lstlisting}
+
+Prześledźmy kolejne kroki wykonania przykładu z rysunku 6. Warto przy tej okazji zwrócić uwagę na fakt, że w algorytmie Smitha-Watermana celowo unika się wprowadzania do macierzy ujemnych wartości. Względu na to w poniższym opisie zastosowano znak $\simeq$ wszędzie tam, gdzie zamiast wartości ujemnej podstawiane jest 0.
+
+W kroku 1:
+\begin{lista}
+\item Wybranie drogi z lewej strony dawałoby: 0 + (-2) $\simeq$ 0
+\item Wybranie drogi z góry dawałoby : 0 + (-2) $\simeq$ 0
+\item Ze względu na to, że litery w kolumnach (T) i rzędach (T) są takie same przejście na skos dawałoby: 0 + 5 = 5
+\item Najbardziej opłacalnym ruchem jest przejście na skos więc zapamiętujemy ten ruch i nadajemy komórce wartość 5
+\end{lista}
+
+W kroku 2:
+\begin{lista}
+\item Wybranie drogi z lewej strony dawałoby: 5 + (-2) = 3
+\item Wybranie drogi z góry dawałoby : 0 + (-2) $\simeq$ 0
+\item Ze względu na to, że litery w kolumnach (G) i rzędach (T) niesą takie same na skos dawałoby: 0 + (-3) $\simeq$ 0
+\item Najbardziej opłacalnym ruchem jest przejście z lewej strony więc zapamiętujemy ten ruch i nadajemy komórce wartość 3
+\end{lista}
+W kroku 3:
+\begin{lista}
+\item Wybranie drogi z lewej strony dawałoby: 3 + (-2) = 1
+\item Wybranie drogi z góry dawałoby : 0 + (-2) $\simeq$ 0
+\item Ze względu na to, że litery w kolumnach (G) i rzędach (T) niesą takie same na skos dawałoby: 0 + (-3) $\simeq$ 0
+\item Najbardziej opłacalnym ruchem jest przejście z lewej strony więc zapamiętujemy ten ruch i nadajemy komórce wartość 1
+\end{lista}
+W kroku 4:
+\begin{lista}
+\item Wybranie drogi z lewej strony dawałoby: 1 + (-2) $\simeq$ 0
+\item Wybranie drogi z góry dawałoby : 0 + (-2) $\simeq$ 0
+\item Ze względu na to, że litery w kolumnach (A) i rzędach (T) niesą takie same na skos dawałoby: 0 + (-3) $\simeq$ 0
+\item W tym momencie wszystkie drogi dają taką samą wartośc nie zapamiętujemy kierunku i nadajemy komórce wartość 0.
+\end{lista}
+
+
+Po wykonaniu analogicznych kroków dla wszystkich komórek macierzy otrzymamy następujący stan:
+\begin{figure}[h]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.5\textwidth]{images/SchematDzialaniaAlgorytmuPelnaMacierz.png}
+  \end{center}
+  \caption{Całkowicie wypełniona macierz dopasowania algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
  \end{figure}
 
 
+W tym momencie macierz jest gotowa do wykonania drugiej fazy - backtrackingu. Polega ona na znalezieniu maksymalnej komórki i zapisaniu wszystkich kroków, które doprowadziły to ustalenie jej wartości. Poniżej przedstawiono macierz z nasiesioną ścieżką metodą backtrackingu. 
 
-Algorytm bazujący na programowaniu dynamicznym umożliwiający poszukiwanie optymalnych lokalnych dopasowań sekwencji.
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sed velit nec nibh varius suscipit. Curabitur nisi purus, porttitor in urna ut, tincidunt aliquam leo. Integer sit amet nisi egestas, congue tellus nec, gravida tellus. Nulla facilisi. Quisque ultrices sem sed arcu mattis, in eleifend lectus imperdiet. Donec ullamcorper cursus tortor, in interdum sem imperdiet non. Aliquam sit amet viverra nisl, vitae ullamcorper dolor. Pellentesque varius ex a urna blandit, ac volutpat sapien feugiat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla posuere ligula ligula, ut ullamcorper nulla tempor vitae.
+Po wykonaniu analogicznych kroków dla wszystkich komórek macierzy otrzymamy stan przedstawiony na rysunku 8.
+\begin{figure}[h]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.5\textwidth]{images/SchematDzialaniaAlgorytmuPelnaMacierzBacktracking.png}
+  \end{center}
+  \caption{Backtracking dla algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
+ \end{figure}
 
-Vestibulum faucibus ex dolor, non suscipit enim sagittis eget. Cras et condimentum elit. Integer porta, quam ac posuere efficitur, magna mauris finibus nisi, at egestas augue diam sed risus. Ut nec nisi quis nunc sagittis volutpat at viverra eros. Donec ut porttitor orci. Mauris eget eleifend neque, id condimentum tortor. Nunc lobortis quam mi, aliquet varius dolor tempus non. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+W efekcie uzyskany wyniki to: [$\nwarrow, \leftarrow, \nwarrow, , \nwarrow$] co należy odczytać jako: [dopasowanie, przerwa, dopasowanie, dopasowanie]. 
+Odpowiada do dopasowaniu przedstawionym na rysunku 9. 
+\begin{figure}[h]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.1\textwidth]{images/uzyskaneDopasowanie.png}
+  \end{center}
+  \caption{Wynika dziłania algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
+ \end{figure}
 
-Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam sed auctor ex. Praesent tempus ipsum sit amet eros tempus, id ornare nulla vulputate. Nullam lobortis mi leo, ac tincidunt est volutpat dapibus. Pellentesque faucibus maximus suscipit. Duis vitae turpis in nisi condimentum finibus quis a arcu. Donec magna massa, elementum rutrum ligula at, dignissim blandit sem. Vivamus est nisl, aliquam ac tellus ac, egestas consectetur erat. Morbi commodo dui non ipsum vehicula dapibus.
 \subsection*{Zarys technologii CUDA}
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sed velit nec nibh varius suscipit. Curabitur nisi purus, porttitor in urna ut, tincidunt aliquam leo. Integer sit amet nisi egestas, congue tellus nec, gravida tellus. Nulla facilisi. Quisque ultrices sem sed arcu mattis, in eleifend lectus imperdiet. Donec ullamcorper cursus tortor, in interdum sem imperdiet non. Aliquam sit amet viverra nisl, vitae ullamcorper dolor. Pellentesque varius ex a urna blandit, ac volutpat sapien feugiat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla posuere ligula ligula, ut ullamcorper nulla tempor vitae.
 
