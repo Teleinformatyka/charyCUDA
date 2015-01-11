@@ -71,19 +71,19 @@ void searchCUDA(CUDA_params &params) {
 
 
 void initCUDA(CUDA_params &params) {
-    params.cuda.column.size = (params.sequence_2.size+1) * sizeof(long); // first row is 0
-    params.cuda.columns_count = params.sequence_1.size;
-    params.cuda.rows_count = params.sequence_2.size;
+    params.cuda.column.size = (params.sequence_2->size+1) * sizeof(long); // first row is 0
+    params.cuda.columns_count = params.sequence_1->size;
+    params.cuda.rows_count = params.sequence_2->size;
 
-    cudaMalloc( (void**)&params.cuda.sequence_1,     params.sequence_1.size );
-    cudaMalloc( (void**)&params.cuda.sequence_2,     params.sequence_2.size );
+    cudaMalloc( &params.cuda.sequence_1,     params.sequence_1->size );
+    cudaMalloc( &params.cuda.sequence_2,     params.sequence_2->size );
     cudaMalloc( (void**)&params.cuda.column.current, params.cuda.column.size );
     cudaMalloc( (void**)&params.cuda.column.prev,    params.cuda.column.size );
     cudaMalloc( (void**)&params.cuda.column.before_prev, params.cuda.column.size );
     cudaMalloc( (void**)&params.cuda.directions,     params.directions_size ); 
 
-    cudaMemcpy( params.cuda.sequence_1, params.sequence_1.data, params.sequence_1.size, cudaMemcpyHostToDevice );
-    cudaMemcpy( params.cuda.sequence_2, params.sequence_2.data, params.sequence_2.size, cudaMemcpyHostToDevice );
+    cudaMemcpy( params.cuda.sequence_1, params.sequence_1->data, params.sequence_1->size, cudaMemcpyHostToDevice );
+    cudaMemcpy( params.cuda.sequence_2, params.sequence_2->data, params.sequence_2->size, cudaMemcpyHostToDevice );
 
     cudaMemset( params.cuda.column.current, 0, params.cuda.column.size );
     cudaMemset( params.cuda.column.before_prev, 0, params.cuda.column.size );

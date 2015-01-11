@@ -1,4 +1,8 @@
-// source https://github.com/ondra-m/smith-waterman
+// source https://github.com/ondra-m/smith-workspace/smith-waterman/CUDA_run
+
+#include <cstring>
+#include <cstdio>
+
 
 struct Sequence {
     char * data;
@@ -18,6 +22,17 @@ struct Sequence {
     }
     char& operator[](int x) {
         return data[x];
+    }
+    Sequence& operator=(Sequence& other) {
+        if (data && size) {
+            delete data;
+        }
+        size = (other.size);
+        data = new char[size];
+        memcpy(data, other.data, other.size);
+        return *this;
+
+
     }
 };
 
@@ -56,8 +71,8 @@ struct Result{
 struct CUDA_params{
     CUDA cuda;
 
-    Sequence sequence_1;
-    Sequence sequence_2;
+    Sequence* sequence_1;
+    Sequence* sequence_2;
 
     Result result;
 

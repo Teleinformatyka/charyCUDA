@@ -66,7 +66,7 @@ OBJ := $(subst $(SRC_DIR), $(OBJ_DIR), $(OBJ))
 
 all: build
 
-build:clean  chary
+build: chary
 
 test: clean  all
 	@echo "Running chary"

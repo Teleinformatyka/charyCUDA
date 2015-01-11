@@ -28,10 +28,47 @@ std::string to_s(int x, int digits = 0){
 
 SmithWaterman::SmithWaterman(Params &params)
 {
-    m_size_x = params.getSequence1().size;
-    m_size_y = params.getSequence2().size;
-    m_sequence1 = std::move(params.getSequence1());
-    m_sequence2 = std::move(params.getSequence2());
+    if (Params::sequence1.size > Params::sequence2.size) {
+        m_size_x = Params::sequence1.size;
+        m_size_y = Params::sequence2.size;
+
+        m_sequence1 = Params::sequence1;
+        m_sequence2 = Params::sequence2;
+    } else {
+        m_size_x = Params::sequence2.size;
+        m_size_y = Params::sequence1.size;
+
+        m_sequence1 = Params::sequence2;
+        m_sequence2 = Params::sequence1;
+
+    }
+
+    m_cudaParams.directions_size = m_size_y;
+
+    m_cudaParams.result.directions = new char[m_size_y];
+    m_cudaParams.result.column = new long[m_size_y+1];
+
+    m_cudaParams.sequence_1 = &m_sequence1;
+
+    m_cudaParams.sequence_2 = &m_sequence2;
+
+    m_cudaParams.cuda.match = Params::match;
+    m_cudaParams.cuda.mismatch = Params::mismatch;
+    m_cudaParams.cuda.gap_penalty = Params::gapPenalty;
+
+    m_cudaParams.cuda.cells_per_thread = 64;
+    m_cudaParams.cuda.threads_per_block = 512;
+    m_cudaParams.cuda.threads_count = ceil((float)m_size_y / (float)m_cudaParams.cuda.cells_per_thread);
+    m_cudaParams.cuda.blocks_count = ceil((float)m_cudaParams.cuda.threads_count / (float)m_cudaParams.cuda.threads_per_block);
+
+
+    m_threads_count = m_cudaParams.cuda.threads_count;
+
+    m_directions.resize(m_size_x+1);
+
+    for(int x=0; x<m_size_x+1; x++){
+        m_directions[x].make(2, m_size_y+1, 0);
+    }
 
 }
 
@@ -200,6 +237,7 @@ void SmithWaterman::make_result(){
     result2 += ((m_best_path->result_line1)[i] == (m_best_path->result_line2)[i] ? '|' : ' ');
     result3 += (m_best_path->result_line2)[i];
 
+    std::cout<<"make_result ----- "<<result1<<result2<<result3<<std::endl;
     if(local_i == Params::charPerRow || (i+1) == (m_best_path->result_line1).size()){
       local_i = -1;
 

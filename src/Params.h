@@ -14,11 +14,11 @@ class Params {
         static int gapPenalty;
         static int charPerRow;
 
+        static Sequence sequence1;
+        static Sequence sequence2;
 
     private:
         void printUsage();
-        Sequence m_sequence1;
-        Sequence m_sequence2;
 
 };
 

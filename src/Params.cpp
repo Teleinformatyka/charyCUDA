@@ -7,7 +7,10 @@
 int Params::match = 5;
 int Params::mismatch = 1;
 int Params::gapPenalty = -1;
-int Params::charPerRow = 4;
+int Params::charPerRow = 50;
+
+Sequence Params::sequence1;
+Sequence Params::sequence2;
 
 Params::Params() {
 }
@@ -35,16 +38,16 @@ bool Params::parse(int argc, char **argv) {
         return 0;
     }
     file.seekg (0, std::ios::end);
-    m_sequence1.size = file.tellg();
+    sequence1.size = file.tellg();
     try {
-        m_sequence1.data = new char[m_sequence1.size ];
+        sequence1.data = new char[sequence1.size ];
     } catch (std::bad_alloc& ba ) {
         std::cerr<<ba.what()<<"\n";
         return 0;
     }
 
     file.seekg (0, std::ios::beg);
-    file.read (m_sequence1.data, m_sequence1.size);
+    file.read (sequence1.data, sequence1.size);
     file.close();
 
     file.open(argv[2]);
@@ -54,15 +57,15 @@ bool Params::parse(int argc, char **argv) {
         return 0;
     }
     file.seekg (0, std::ios::end);
-    m_sequence2.size = file.tellg();
+    sequence2.size = file.tellg();
     try {
-        m_sequence2.data = new char[m_sequence2.size];
+        sequence2.data = new char[sequence2.size];
     } catch (std::bad_alloc& ba) {
         std::cerr<<ba.what()<<"\n";
         return 0;
     }
     file.seekg (0, std::ios::beg);
-    file.read (m_sequence2.data, m_sequence2.size);
+    file.read (sequence2.data, sequence2.size);
     file.close();
 
     return 1;
@@ -70,19 +73,19 @@ bool Params::parse(int argc, char **argv) {
 
 Sequence& Params::getSequence1() {
     // HACK: zeby bylo szybicje
-    if (m_sequence1.size < m_sequence2.size) {
-        return m_sequence2;
+    if (sequence1.size < sequence2.size) {
+        return sequence2;
     }
 
-    return m_sequence1;
+    return sequence1;
 }
 
 Sequence& Params::getSequence2() {
-    if (m_sequence1.size > m_sequence2.size) {
-        return m_sequence2;
+    if (sequence1.size < sequence2.size) {
+        return sequence1;
     }
 
-    return m_sequence1;
+    return sequence2;
 }
 
 
