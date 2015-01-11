@@ -30,7 +30,6 @@
 # doc
 *.aux
 *.log
-*.pdf
 *.gz
 chary
 
