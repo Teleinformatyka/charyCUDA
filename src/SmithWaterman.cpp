@@ -18,8 +18,7 @@ std::string to_s(int x, int digits = 0){
 
   if(digits == 0){
     tmp << x;
-  }
-  else{
+  }  else{
     tmp << std::setw(digits) << x;
   }
 
@@ -58,7 +57,7 @@ SmithWaterman::SmithWaterman(Params &params)
     m_cudaParams.cuda.gap_penalty = Params::gapPenalty;
 
     m_cudaParams.cuda.cells_per_thread = 64;
-    m_cudaParams.cuda.threads_per_block = 512;
+    m_cudaParams.cuda.threads_per_block = 1024;
     m_cudaParams.cuda.threads_count = ceil((float)m_size_y / (float)m_cudaParams.cuda.cells_per_thread);
     m_cudaParams.cuda.blocks_count = ceil((float)m_cudaParams.cuda.threads_count / (float)m_cudaParams.cuda.threads_per_block);
 
@@ -83,72 +82,74 @@ SmithWaterman::~SmithWaterman() {
 
 void SmithWaterman::search() {
 
-  long max_value, value;
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    cudaEventRecord(start, 0);
+
+    long max_value, value;
 
 
-  initCUDA(m_cudaParams);
+    initCUDA(m_cudaParams);
 
-  std::vector<Score> all_scores;
-  max_value = 0;
-  for(int iteration=0; iteration<(m_size_x+(m_size_y/m_cudaParams.cuda.threads_count)); iteration++){
+    max_value = 0;
+    for(int iteration=0; iteration<(m_size_x+(m_size_y/m_cudaParams.cuda.threads_count)); iteration++){
 
-    m_cudaParams.cuda.iteration = iteration;
+        m_cudaParams.cuda.iteration = iteration;
 
-    searchCUDA(m_cudaParams);
-    cudaError_t cudaerr = cudaDeviceSynchronize();
-    if (cudaerr) {
-        std::cerr<<"kernel launch failed with error "<<cudaGetErrorString(cudaerr);
-    }
+        searchCUDA(m_cudaParams);
 
-    value = *std::max_element(m_cudaParams.result.column, m_cudaParams.result.column+m_size_y + 1);
-    if(value > max_value){
-      all_scores.clear();
-      m_best_score = max_value = value;
-    }
-
-    for(int thread=0; thread<m_cudaParams.cuda.threads_count; thread++){
-      int x = iteration - thread;
-      int y = thread * m_cudaParams.cuda.cells_per_thread;
-      int end_y = y + m_cudaParams.cuda.cells_per_thread;
-
-      while(y < end_y && y <= m_size_y && x >= 0 && x < m_size_x){
-
-        m_directions[x+1].set(y+1, m_cudaParams.result.directions[y]);
-
-        if(m_cudaParams.result.column[y+1] == max_value){
-          Score s(value, x+1, y+1);
-          all_scores.push_back(s);
+        value = *std::max_element(m_cudaParams.result.column, m_cudaParams.result.column+m_size_y + 1);
+        if(value > max_value){
+            m_all_scores.clear();
+            m_best_score = max_value = value;
         }
 
-        y++;
-      }
+        for(int thread=0; thread<m_cudaParams.cuda.threads_count; thread++){
+            int x = iteration - thread;
+            int y = thread * m_cudaParams.cuda.cells_per_thread;
+            int end_y = y + m_cudaParams.cuda.cells_per_thread;
+
+            while(y < end_y && y <= m_size_y && x >= 0 && x < m_size_x){
+
+                m_directions[x+1].set(y+1, m_cudaParams.result.directions[y]);
+
+                if(m_cudaParams.result.column[y+1] == max_value){
+                  Score s(value, x+1, y+1);
+                  m_all_scores.push_back(s);
+                }
+
+                y++;
+            }
+        }
+
     }
 
-  }
 
+    deinitCUDA(m_cudaParams.cuda);
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
 
-  deinitCUDA(m_cudaParams.cuda);
-
-  find_path(all_scores);
+    cudaEventElapsedTime(&m_duration, start, stop);
 }
 
 // -------------------------------------------------------------------------------------------
 
-void SmithWaterman::find_path(std::vector<Score> &all_scores){
+void SmithWaterman::find_path(){
 
-  for(auto score=all_scores.begin(); score!=all_scores.end(); ++score){
-    make_path(*score);
-  }
-
-  for(auto path=m_paths.begin(); path!=m_paths.end(); ++path){
-
-    if((*path).value == m_best_path_value){
-      m_best_path = &(*path);
-      break;
+    for(auto score = m_all_scores.begin(); score != m_all_scores.end(); ++score){
+        make_path(*score);
     }
-  }
 
-  make_result();
+    for(auto path=m_paths.begin(); path!=m_paths.end(); ++path){
+
+        if((*path).value == m_best_path_value){
+            m_best_path = &(*path);
+            break;
+        }
+    }
+
+    make_result();
 }
 
 // -------------------------------------------------------------------------------------------
@@ -164,9 +165,9 @@ void SmithWaterman::make_path(Score &score){
   int x = score.x;
   int y = score.y;
 
-  bool end=false;
+  bool end = false;
 
-  do{
+  do {
 
     path.add(x, y);
 
@@ -218,77 +219,77 @@ void SmithWaterman::make_path(Score &score){
   m_paths.push_back(path);
 }
 
-// -------------------------------------------------------------------------------------------
 
-void SmithWaterman::make_result(){
+void SmithWaterman::make_result() {
 
-  std::string result1;
-  std::string result2;
-  std::string result3;
+    std::string result1;
+    std::string result2;
+    std::string result3;
 
-  int biggest_number = std::max((m_best_path -> points).back().x, (m_best_path -> points).back().y);
-  int digits = 0;
-  do { biggest_number /= 10; digits++; } while (biggest_number != 0);
+    int biggest_number = std::max((m_best_path -> points).back().x, (m_best_path -> points).back().y);
+    int digits = 0;
+    do { biggest_number /= 10; digits++; } while (biggest_number != 0);
 
-  int x = (m_best_path -> points).front().x;
-  int y = (m_best_path -> points).front().y;
+    int x = (m_best_path -> points).front().x;
+    int y = (m_best_path -> points).front().y;
 
-  int local_i = 0;
+    int local_i = 0;
 
-  for(int i=0; i<(m_best_path -> result_line1).size(); i++){
+    for(int i=0; i<(m_best_path -> result_line1).size(); i++){
 
-    if(local_i == 0){
-      result1 = to_s(x, digits) + " ";
-      result2 = std::string(digits+1, ' ');
-      result3 = to_s(y, digits) + " ";
+        if(local_i == 0){
+            result1 = to_s(x, digits) + " ";
+            result2 = std::string(digits+1, ' ');
+            result3 = to_s(y, digits) + " ";
+        }
+
+        result1 += (m_best_path->result_line1)[i];
+        result2 += ((m_best_path->result_line1)[i] == (m_best_path->result_line2)[i] ? '|' : ' ');
+        result3 += (m_best_path->result_line2)[i];
+
+        if(local_i == Params::charPerRow || (i+1) == (m_best_path->result_line1).size()){
+            local_i = -1;
+
+            result1 += " " + to_s(x, digits);
+            result3 += " " + to_s(y, digits);
+
+            m_result += result1;
+            m_result += '\n';
+            m_result += result2;
+            m_result += '\n';
+            m_result += result3;
+            m_result += '\n';
+            m_result += '\n';
+        }
+
+        if((m_best_path->result_line1)[i] != '-'){ x++; }
+        if((m_best_path->result_line2)[i] != '-'){ y++; }
+
+        local_i++;
     }
-
-    result1 += (m_best_path->result_line1)[i];
-    result2 += ((m_best_path->result_line1)[i] == (m_best_path->result_line2)[i] ? '|' : ' ');
-    result3 += (m_best_path->result_line2)[i];
-
-    if(local_i == Params::charPerRow || (i+1) == (m_best_path->result_line1).size()){
-      local_i = -1;
-
-      result1 += " " + to_s(x, digits);
-      result3 += " " + to_s(y, digits);
-
-      m_result += result1;
-      m_result += '\n';
-      m_result += result2;
-      m_result += '\n';
-      m_result += result3;
-      m_result += '\n';
-      m_result += '\n';
-    }
-
-    if((m_best_path->result_line1)[i] != '-'){ x++; }
-    if((m_best_path->result_line2)[i] != '-'){ y++; }
-
-    local_i++;
-  }
 }
 
 
-void SmithWaterman::print(double duration){
+void SmithWaterman::print(){
 
+    find_path();
 
- std::cout << "Match: " << Params::match << std::endl;
-  std::cout << "Mismatch: " << Params::mismatch << std::endl;
-  std::cout << "Gap penalty: " << Params::gapPenalty << std::endl;
+    std::cout << "Match: " << Params::match << std::endl;
+    std::cout << "Mismatch: " << Params::mismatch << std::endl;
+    std::cout << "Gap penalty: " << Params::gapPenalty << std::endl;
 
-  std::cout << "Size of #1: " << m_sequence1.size << std::endl;
-  std::cout << "Size of #2: " << m_sequence2.size << std::endl;
+    std::cout << "Size of #1: " << m_sequence1.size << std::endl;
+    std::cout << "Size of #2: " << m_sequence2.size << std::endl;
 
-  std::cout << "Score: " << m_best_score << std::endl;
-  std::cout << "Finded path: " << m_paths.size() << std::endl;
-  std::cout << "Threads: " << m_threads_count << std::endl;
+    std::cout << "Score: " << m_best_score << std::endl;
+    std::cout << "Finded path: " << m_paths.size() << std::endl;
+    std::cout << "Threads: " << m_threads_count << std::endl;
 
-  std::cout << "Time: " << duration << "s" << std::endl;
+    std::cout << "Time: " << m_duration << "ms" << std::endl;
 
-  std::cout << std::endl;
+    std::cout << std::endl;
 
-  std::cout << m_result << std::endl;
+    std::cout << m_result << std::endl;
 }
 
 

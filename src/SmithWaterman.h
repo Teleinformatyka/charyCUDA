@@ -58,14 +58,13 @@ class SmithWaterman {
          SmithWaterman (Params &params);
         virtual ~SmithWaterman ();
         virtual void search();
-        void find_path(std::vector<Score> &all_scores);
+        void print();
+
+    private:
+        void find_path();
         void make_path(Score &score);
         void make_result();
 
-        void print(double duration=0);
-        void print_matrices();
-
-    private:
         unsigned int m_size_y;
         unsigned int m_size_x;
 
@@ -88,5 +87,7 @@ class SmithWaterman {
         Path * m_best_path;
         std::vector<Path> m_paths;
         CUDA_params m_cudaParams;
+        std::vector<Score> m_all_scores;
+        float m_duration;
 };
 #endif
