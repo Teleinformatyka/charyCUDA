@@ -52,6 +52,7 @@ SmithWaterman::SmithWaterman(Params &params)
 
     m_cudaParams.sequence_2 = &m_sequence2;
 
+
     m_cudaParams.cuda.match = Params::match;
     m_cudaParams.cuda.mismatch = Params::mismatch;
     m_cudaParams.cuda.gap_penalty = Params::gapPenalty;
@@ -70,6 +71,10 @@ SmithWaterman::SmithWaterman(Params &params)
         m_directions[x].make(2, m_size_y+1, 0);
     }
     m_best_score = 0;
+    m_best_path_value = 0;
+    m_result = "";
+
+
 }
 
 SmithWaterman::~SmithWaterman() {
@@ -90,6 +95,10 @@ void SmithWaterman::search() {
     m_cudaParams.cuda.iteration = iteration;
 
     searchCUDA(m_cudaParams);
+    cudaError_t cudaerr = cudaDeviceSynchronize();
+    if (cudaerr) {
+        std::cerr<<"kernel launch failed with error "<<cudaGetErrorString(cudaerr);
+    }
 
     value = *std::max_element(m_cudaParams.result.column, m_cudaParams.result.column+m_size_y + 1);
     if(value > max_value){
@@ -191,6 +200,7 @@ void SmithWaterman::make_path(Score &score){
         path.result_line1 += m_sequence1[x];
         path.result_line2 += '-';
 
+
         path.value += Params::gapPenalty;
         break;
     }
@@ -237,7 +247,6 @@ void SmithWaterman::make_result(){
     result2 += ((m_best_path->result_line1)[i] == (m_best_path->result_line2)[i] ? '|' : ' ');
     result3 += (m_best_path->result_line2)[i];
 
-    std::cout<<"make_result ----- "<<result1<<result2<<result3<<std::endl;
     if(local_i == Params::charPerRow || (i+1) == (m_best_path->result_line1).size()){
       local_i = -1;
 

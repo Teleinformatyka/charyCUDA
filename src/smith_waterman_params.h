@@ -71,8 +71,8 @@ struct Result{
 struct CUDA_params{
     CUDA cuda;
 
-    Sequence* sequence_1;
-    Sequence* sequence_2;
+    Sequence * sequence_1;
+    Sequence *  sequence_2;
 
     Result result;
 

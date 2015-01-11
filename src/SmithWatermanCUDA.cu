@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <algorithm>    // std::max
 
 
 
@@ -15,20 +14,22 @@ if ((err = cudaGetLastError()) != cudaSuccess) {    \
 
 
 
-__device__ void get_value(long long match, long long deletion, long long insertion, long long value, unsigned  char &direction){
-  /* direction = 0; */
+__device__ void get_value(long long match, long long deletion, long long insertion, long long &value, char &direction){
+    value = max((long long)0, max(match, max(deletion, insertion)));
+  direction = 0;
+
 
   if(value == 0){ return; }
-  /*  */
-  /* if     (value == match)    { direction = 1; } */
-  /* else if(value == deletion) { direction = 2; } */
-  /* else if(value == insertion){ direction = 3; } */
+
+  if     (value == match)    { direction = 1; }
+  else if(value == deletion) { direction = 2; }
+  else if(value == insertion){ direction = 3; }
 
 
 }
 
 
-__global__ void runCUDA(CUDA& params) {
+__global__ void runCUDA(CUDA params, Column column) {
     long long match, deletion, insertion, value;
 
     int id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -36,22 +37,21 @@ __global__ void runCUDA(CUDA& params) {
     int y = id * params.cells_per_thread + 1;
     int end_y = y + params.cells_per_thread;
 
-    unsigned char direction = 0;
+    char direction = 0;
     bool first=true;
 
     while(y < end_y && y <= params.rows_count && x >= 0 && x < params.columns_count){
-        match = (first == true ? params.column.before_prev : params.column.prev)[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? params.match : params.mismatch);
-    /*     deletion = params.column.prev[y] + params.gap_penalty; */
-    /*     insertion = (first == true ? params.column.prev : params.column.current)[y-1] + params.gap_penalty; */
-    /*  */
-        /* get_value(match, deletion, insertion, value, direction); */
-    /*  */
-    /*  */
-    /*     params.column.current[y] = value; */
-    /*     params.directions[y-1] = direction; */
-    /*  */
-    /*     y++; */
-        /* first = false; */
+        match = (first == true ? column.before_prev : column.prev)[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? params.match : params.mismatch);
+        deletion = column.prev[y] + params.gap_penalty;
+        insertion = (first == true ? column.prev : column.current)[y-1] + params.gap_penalty;
+
+        get_value(match, deletion, insertion, value, direction);
+
+        column.current[y] = value;
+        params.directions[y-1] = direction;
+
+        y++;
+        first = false;
     }
 
 
@@ -61,7 +61,7 @@ void searchCUDA(CUDA_params &params) {
   cudaMemcpy( params.cuda.column.before_prev, params.cuda.column.prev, params.cuda.column.size, cudaMemcpyDeviceToDevice );
   cudaMemcpy( params.cuda.column.prev, params.cuda.column.current, params.cuda.column.size, cudaMemcpyDeviceToDevice );
   cudaMemset( params.cuda.column.current, 0, params.cuda.column.size );
- runCUDA<<<params.cuda.blocks_count, params.cuda.threads_per_block>>>(params.cuda);
+ runCUDA<<<params.cuda.blocks_count, params.cuda.threads_per_block>>>(params.cuda, params.cuda.column);
  cudaError_t err;   
     if ((err = cudaGetLastError()) != cudaSuccess) {    
             int device;

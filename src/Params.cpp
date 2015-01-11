@@ -5,9 +5,9 @@
 #include "Params.h"
 
 int Params::match = 5;
-int Params::mismatch = 1;
-int Params::gapPenalty = -1;
-int Params::charPerRow = 50;
+int Params::mismatch = -3;
+int Params::gapPenalty = -4;
+int Params::charPerRow = 100;
 
 Sequence Params::sequence1;
 Sequence Params::sequence2;
