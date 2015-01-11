@@ -16,6 +16,9 @@ struct Sequence {
             size = 0;
         }
     }
+    char& operator[](int x) {
+        return data[x];
+    }
 };
 
 struct Column{

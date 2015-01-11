@@ -4,10 +4,12 @@
 
 #include "Params.h"
 
+int Params::match = 5;
+int Params::mismatch = 1;
+int Params::gapPenalty = -1;
+int Params::charPerRow = 4;
+
 Params::Params() {
-    m_match = 5;
-    m_mismatch = 1;
-    m_gapPenalty = -1;
 }
 
 void Params::printUsage() {
@@ -54,7 +56,7 @@ bool Params::parse(int argc, char **argv) {
     file.seekg (0, std::ios::end);
     m_sequence2.size = file.tellg();
     try {
-        m_sequence2.data = new char[m_sequence2.size + 1];
+        m_sequence2.data = new char[m_sequence2.size];
     } catch (std::bad_alloc& ba) {
         std::cerr<<ba.what()<<"\n";
         return 0;
@@ -67,10 +69,19 @@ bool Params::parse(int argc, char **argv) {
 }
 
 Sequence& Params::getSequence1() {
+    // HACK: zeby bylo szybicje
+    if (m_sequence1.size < m_sequence2.size) {
+        return m_sequence2;
+    }
+
     return m_sequence1;
 }
 
 Sequence& Params::getSequence2() {
+    if (m_sequence1.size > m_sequence2.size) {
+        return m_sequence2;
+    }
+
     return m_sequence1;
 }
 
