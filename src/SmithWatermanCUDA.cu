@@ -1,4 +1,3 @@
-#include "SmithWaterman.h"
 
 #include <cstdio>
 
@@ -9,27 +8,15 @@ if ((err = cudaGetLastError()) != cudaSuccess) {    \
         cudaGetDevice(&device);\
     printf("CUDA error on GPU %d: %s : %s, line %d\n", device, cudaGetErrorString(err), __FILE__, __LINE__); }}while(0);
 
-__global__ void searchCUDA() {
+__global__ void runCUDA() {
     printf("%d", threadIdx.x);
     
 
 }
+void searchCUDA() {
 
-SmithWaterman::SmithWaterman() {
-
-}
-
-SmithWaterman::~SmithWaterman() {
-
-}
-
-void SmithWaterman::search(Params &params) {
+    runCUDA<<<20, 30>>>();
     
 
-    dim3 grid( 3 );
-    dim3 block( 3, 32 );
-    searchCUDA<<<grid, block>>>();
-    uint *g_H;
 }
-
 

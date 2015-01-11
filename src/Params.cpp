@@ -1,10 +1,13 @@
 #include <fstream>
 #include <iostream>
+#include <new>
 
 #include "Params.h"
 
 Params::Params() {
-
+    m_match = 5;
+    m_mismatch = 1;
+    m_gapPenalty = -1;
 }
 
 void Params::printUsage() {
@@ -15,9 +18,6 @@ void Params::printUsage() {
 
 
 Params::~Params() {
-    m_match = 5;
-    m_mismatch = 1;
-    m_gapPenalty = -1;
 
 }
 
@@ -34,7 +34,12 @@ bool Params::parse(int argc, char **argv) {
     }
     file.seekg (0, std::ios::end);
     m_sequence1.size = file.tellg();
-    m_sequence1.data = new char[m_sequence1.size ];
+    try {
+        m_sequence1.data = new char[m_sequence1.size ];
+    } catch (std::bad_alloc& ba ) {
+        std::cerr<<ba.what()<<"\n";
+        return 0;
+    }
 
     file.seekg (0, std::ios::beg);
     file.read (m_sequence1.data, m_sequence1.size);
@@ -48,7 +53,12 @@ bool Params::parse(int argc, char **argv) {
     }
     file.seekg (0, std::ios::end);
     m_sequence2.size = file.tellg();
-    m_sequence2.data = new char[m_sequence2.size + 1];
+    try {
+        m_sequence2.data = new char[m_sequence2.size + 1];
+    } catch (std::bad_alloc& ba) {
+        std::cerr<<ba.what()<<"\n";
+        return 0;
+    }
     file.seekg (0, std::ios::beg);
     file.read (m_sequence2.data, m_sequence2.size);
     file.close();
