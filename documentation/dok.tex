@@ -71,7 +71,7 @@ Problem tej klasy można interpretować na dwa sposoby. Istnieją rozwiązania a
 \item dopasowanie lokalne
 \end{lista}
 
-W przypadku dopasowania globalnego dwa ciągi porównywane są wzdłuż całej sekwencji. Takie rozwiązanie jest przydatne przy jednodomenowych białakach. Schemat takiego dopasowania przedstawiono poniżej: 
+W przypadku dopasowania globalnego dwa ciągi porównywane są wzdłuż całej sekwencji. Takie rozwiązanie jest wykorzystywane przy analizie jednodomenowych białek. Algorytmem tego typu jest na przykład algorytm Needlemana-Wunscha. Schemat takiego dopasowania przedstawiono poniżej: 
 
 \begin{figure}[h]
   \vspace{5pt}
@@ -95,11 +95,58 @@ Lokalny typ dopasowania polega na rozszerzeniu możliwości algorytmów pierwsze
  \end{figure}
  
  
-Vestibulum faucibus ex dolor, non suscipit enim sagittis eget. Cras et condimentum elit. Integer porta, quam ac posuere efficitur, magna mauris finibus nisi, at egestas augue diam sed risus. Ut nec nisi quis nunc sagittis volutpat at viverra eros. Donec ut porttitor orci. Mauris eget eleifend neque, id condimentum tortor. Nunc lobortis quam mi, aliquet varius dolor tempus non. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Dla uwidocznienia różnicy w działaniu tych dwóch typów algorytmów posłużmy się przykładem następujących ciągów:
+\begin{lista}
+ \item TGGAACCA
+\item ACCATGGA
+\end{lista}
 
-Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam sed auctor ex. Praesent tempus ipsum sit amet eros tempus, id ornare nulla vulputate. Nullam lobortis mi leo, ac tincidunt est volutpat dapibus. Pellentesque faucibus maximus suscipit. Duis vitae turpis in nisi condimentum finibus quis a arcu. Donec magna massa, elementum rutrum ligula at, dignissim blandit sem. Vivamus est nisl, aliquam ac tellus ac, egestas consectetur erat. Morbi commodo dui non ipsum vehicula dapibus.
+Powyższa sekwencja składa się z dwóch czteroliterowych sekwencji umieszczony w różnej kolejności. Poniżej przedstawiono macierze podobieństawa uzyskane przez oba algorytmy wraz ze znalozionymi rozwiązaniami. Proces powstawania macierzy tego typu zostanie opisany w dalszej częście tego dokumentu. 
+
+
+\begin{figure}[h]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=1.0\textwidth]{images/Globalne_lokalne_przyklad.png}
+  \end{center}
+  \caption{Przykład różnicy w działaniu dopasowania globalnego (po lewo) i dopasowania lokalnego (po prawo)}
+ \end{figure}
+
+
+W przypadku globalnego dopasowania najlepszy uzyskany wynik jest jeden. Algorytm uzaje, że za najpesze dopasowanie należy uznać następującą interpretacje: 
+Dla uwidocznienia różnicy w działaniu tych dwóch typów algorytmów posłużmy się przykładem następujących ciągów:
+\begin{lista}
+ \item Pierwszy znak został podmieniony
+\item Natępnie brakuje 4 znaków w drugim ciągu
+\item Kolejne dwa znaki pasują do siebie
+\item Natępnie brakuje 4 znaków w pierwszym ciągu
+\item Ostatnie znaki pasują do siebie
+\end{lista}
+
+Jak widać, takie rozwiązanie nie jest w stanie wykryć istoty zadanego przykładu. Dla odmiany dopasowanie lokalne nie narzuca jednego najlepszego rozwiązania. Po zbudowaniu macierzy podobieństwa możemy zauważyć że istnieją dwie ścieżki punktowane w ten sam sposób. Jedna z nich repreztuje informacje o znalezieniu dopasowania podciągów "ACCA", druga o znalezieniu dopasowania podciągów "TGGA". W przypadku dużych ciągów wejściowych powyższe macierze reprezentuje się w odmienny sposób. Przyjmując pewną wartość progową można utworzyć wykres tego typu:
+
+\begin{figure}[h]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.6\textwidth]{images/macierz.png}
+  \end{center}
+  \caption{Przykład wizualnej reprezentacji macierzy podobieństwa dla algorytmu dopasowania lokalnego}
+\end{figure}
+
+Dzięki takiemu przedstawieniu wyników możliwe jest zwrócenie uwagi na fragmenty zawierające istotne podobieństwo. 
+
 
 \subsection*{Algorytm Smitha-Watermana w ujęciu sekwencyjnym}
+
+Algorym Smitha-Watermana składa się z się z dwóch etapów:
+\begin{lista}
+ \item Tworzenie macierzy podobieństwa
+\item Otwarzanie optymalnej ścieżki (ang. backtracking)
+\end{lista}
+
+
 Algorytm bazujący na programowaniu dynamicznym umożliwiający poszukiwanie optymalnych lokalnych dopasowań sekwencji.
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sed velit nec nibh varius suscipit. Curabitur nisi purus, porttitor in urna ut, tincidunt aliquam leo. Integer sit amet nisi egestas, congue tellus nec, gravida tellus. Nulla facilisi. Quisque ultrices sem sed arcu mattis, in eleifend lectus imperdiet. Donec ullamcorper cursus tortor, in interdum sem imperdiet non. Aliquam sit amet viverra nisl, vitae ullamcorper dolor. Pellentesque varius ex a urna blandit, ac volutpat sapien feugiat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla posuere ligula ligula, ut ullamcorper nulla tempor vitae.
 
@@ -129,7 +176,7 @@ Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos
 Łukasz Ligowski, Witold Rudnicki - AN EFFICIENT IMPLEMENTATION OF SMITH WATERMAN ALGORITHM ON GPU USING CUDA, FOR MASSIVELY PARALLEL SCANNING OF SEQUENCE DATABASES
 
 E. Banachowicz Bioinformatyka - wykład monograficzny 
-
+http://opal.przyjaznycms.pl/
 
 
 
