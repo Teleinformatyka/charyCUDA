@@ -1,20 +1,24 @@
 #ifndef PARAMS_H
 #define PARAMS_H
+#include "smith_waterman_params.h"
+
 class Params {
     public:
         Params ();
         virtual ~Params ();
         bool parse(int argc, char**argv);
+        Sequence& getSequence1();
+        Sequence& getSequence2();
 
 
     private:
         void printUsage();
-        // file with data
-        char * m_dbFile;
-        int m_dbSize;
-        // file with query
-        char * m_queryFile;
-        int m_querySize;
+        Sequence m_sequence1;
+        Sequence m_sequence2;
+        int m_match;
+        int m_mismatch;
+        int m_gapPenalty;
+
 };
 
 

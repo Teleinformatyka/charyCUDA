@@ -11,9 +11,11 @@ if ((err = cudaGetLastError()) != cudaSuccess) {    \
 
 __global__ void searchCUDA() {
     printf("%d", threadIdx.x);
+    
+
 }
 
-SmithWaterman::SmithWaterman(Params &params) {
+SmithWaterman::SmithWaterman() {
 
 }
 
@@ -21,10 +23,13 @@ SmithWaterman::~SmithWaterman() {
 
 }
 
-void SmithWaterman::search() {
+void SmithWaterman::search(Params &params) {
+    
+
     dim3 grid( 3 );
     dim3 block( 3, 32 );
     searchCUDA<<<grid, block>>>();
+    uint *g_H;
 }
 
 

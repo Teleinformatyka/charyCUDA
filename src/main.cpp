@@ -16,9 +16,8 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    auto test = 1;
-    SmithWaterman alg{params};
-    alg.search();
+    SmithWaterman alg{};
+    alg.search(params);
     cudaError_t cudaerr = cudaDeviceSynchronize();
     if (cudaerr) {
         std::cerr<<"kernel launch failed with error "<<cudaGetErrorString(cudaerr);

@@ -10,9 +10,9 @@
 
 class SmithWaterman {
 public:
-       __host__ __device__  SmithWaterman (Params &params);
+       __host__ __device__  SmithWaterman ();
     virtual ~SmithWaterman ();
-    virtual void search();
+    virtual void search(Params &params);
 private:
 
 };

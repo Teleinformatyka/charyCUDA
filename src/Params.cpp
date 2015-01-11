@@ -4,8 +4,6 @@
 #include "Params.h"
 
 Params::Params() {
-    m_queryFile = nullptr;
-    m_dbFile = nullptr;
 
 }
 
@@ -17,12 +15,10 @@ void Params::printUsage() {
 
 
 Params::~Params() {
+    m_match = 5;
+    m_mismatch = 1;
+    m_gapPenalty = -1;
 
-    if (m_queryFile) {
-        delete[] m_queryFile;
-        delete[] m_dbFile;
-
-    }
 }
 
 bool Params::parse(int argc, char **argv) {
@@ -36,10 +32,12 @@ bool Params::parse(int argc, char **argv) {
         printUsage();
         return 0;
     }
-    m_dbSize = file.tellg();
-    m_dbFile = new char[m_dbSize];
+    file.seekg (0, std::ios::end);
+    m_sequence1.size = file.tellg();
+    m_sequence1.data = new char[m_sequence1.size ];
+
     file.seekg (0, std::ios::beg);
-    file.read (m_dbFile, m_dbSize);
+    file.read (m_sequence1.data, m_sequence1.size);
     file.close();
 
     file.open(argv[2]);
@@ -48,12 +46,22 @@ bool Params::parse(int argc, char **argv) {
         printUsage();
         return 0;
     }
-    m_querySize = file.tellg();
-    m_queryFile = new char[m_querySize];
+    file.seekg (0, std::ios::end);
+    m_sequence2.size = file.tellg();
+    m_sequence2.data = new char[m_sequence2.size + 1];
     file.seekg (0, std::ios::beg);
-    file.read (m_dbFile, m_querySize);
+    file.read (m_sequence2.data, m_sequence2.size);
     file.close();
 
     return 1;
-
 }
+
+Sequence& Params::getSequence1() {
+    return m_sequence1;
+}
+
+Sequence& Params::getSequence2() {
+    return m_sequence1;
+}
+
+
