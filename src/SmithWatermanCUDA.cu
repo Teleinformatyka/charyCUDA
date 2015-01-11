@@ -15,7 +15,15 @@ if ((err = cudaGetLastError()) != cudaSuccess) {    \
 
 
 
-__device__ void get_value(long long match, long long deletion, long long insertion, long long value, char &direction){
+__device__ void get_value(long long match, long long deletion, long long insertion, long long value, unsigned  char &direction){
+  /* direction = 0; */
+
+  if(value == 0){ return; }
+  /*  */
+  /* if     (value == match)    { direction = 1; } */
+  /* else if(value == deletion) { direction = 2; } */
+  /* else if(value == insertion){ direction = 3; } */
+
 
 }
 
@@ -28,29 +36,22 @@ __global__ void runCUDA(CUDA& params) {
     int y = id * params.cells_per_thread + 1;
     int end_y = y + params.cells_per_thread;
 
-    char direction;
+    unsigned char direction = 0;
     bool first=true;
 
     while(y < end_y && y <= params.rows_count && x >= 0 && x < params.columns_count){
         match = (first == true ? params.column.before_prev : params.column.prev)[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? params.match : params.mismatch);
-        deletion = params.column.prev[y] + params.gap_penalty;
-        insertion = (first == true ? params.column.prev : params.column.current)[y-1] + params.gap_penalty;
-
-   value =  max((long long)0, max(match, max(deletion, insertion))); */
-
-  direction = 0;
-
-  if(value == 0){ return; }
-
-  if     (value == match)    { direction = 1; }
-  else if(value == deletion) { direction = 2; }
-  else if(value == insertion){ direction = 3; }
-
-        params.column.current[y] = value;
-        params.directions[y-1] = direction;
-
-        y++;
-        first = false;
+    /*     deletion = params.column.prev[y] + params.gap_penalty; */
+    /*     insertion = (first == true ? params.column.prev : params.column.current)[y-1] + params.gap_penalty; */
+    /*  */
+        /* get_value(match, deletion, insertion, value, direction); */
+    /*  */
+    /*  */
+    /*     params.column.current[y] = value; */
+    /*     params.directions[y-1] = direction; */
+    /*  */
+    /*     y++; */
+        /* first = false; */
     }
 
 
