@@ -69,7 +69,7 @@ SmithWaterman::SmithWaterman(Params &params)
     for(int x=0; x<m_size_x+1; x++){
         m_directions[x].make(2, m_size_y+1, 0);
     }
-
+    m_best_score = 0;
 }
 
 SmithWaterman::~SmithWaterman() {
@@ -91,7 +91,7 @@ void SmithWaterman::search() {
 
     searchCUDA(m_cudaParams);
 
-    value = *std::max_element(m_cudaParams.result.column, m_cudaParams.result.column+m_size_y+1);
+    value = *std::max_element(m_cudaParams.result.column, m_cudaParams.result.column+m_size_y + 1);
     if(value > max_value){
       all_scores.clear();
       m_best_score = max_value = value;
