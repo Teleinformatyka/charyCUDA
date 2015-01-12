@@ -16,6 +16,7 @@
 \usepackage{listings}
 \usepackage{datetime}
 \usepackage{titlesec}
+\usepackage{float}
 \renewcommand{\onehalfspacing}{\setstretch{1.6}}
 \geometry{tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
 \setlength{\parindent}{1cm}
@@ -26,7 +27,7 @@
   \setlength{\parskip}{0pt}
   \setlength{\parsep}{0pt}
 }{\end{itemize}}
-\titleformat{\section}[block]{\Large\bfseries\filcenter}{}{1em}{}
+\titleformat{\section}[block]{\bfseries}{}{1em}{}
 \newcommand{\linia}{\rule{\linewidth}{0.4mm}}
 \definecolor{lbcolor}{rgb}{0.95,0.95,0.95}
 \lstset{
@@ -49,19 +50,19 @@
   }
 \begin{document}
 \noindent
-\begin{tabular}{|c|p{11cm}|c|} \hline 
-Grupa Wtorek 9.15 & Michał Jaworek, Marcin Kaciuba & \ddmmyyyydate\today \tabularnewline
-\hline 
-\end{tabular}
 
 
-\section*{Algorytm Smitha-Watermana - poszukiwanie optymalnych lokalnych dopasowań sekwencji }
+
+\title{Algorytm Smitha-Watermana - poszukiwanie optymalnych lokalnych dopasowań sekwencji }
+\author{Michał Jaworek, Marcin Kaciuba\\ Politechnika Krakowska}
+\maketitle
 
 
-\subsection*{Abstrakt}
+
+\section*{Abstrakt}
 Algorytmy dopasowania sekwencji znajduje swoje zastosowanie m. in. w bioinformatyce do poszukiwań dopasowań sekwencji nukleotydów i aminokwasów. Algorytm Smitha-Watermana należy do podgrupy rozwiązań zajmujących jest tzw. dopasowaniem lokalnym. W poniższym dokumencie przedstawiono opis prób zrównoleglenia tego algorytmu z wykorzystaniem technologii CUDA. 
 
-\subsection*{Przedostawienie problemu}
+\section*{Przedostawienie problemu}
 
 Problem dopasowania sekwencji przyjmuje na wejściu dwa ciągi znaków. W ogólnym przypadku, ciągi te mogą składać się z liter dowolnego alfabetu. W przypadku zastosowań bioinformatyczych zazwyczaj ten alfabet jest relatywnie niewielki (np. czteroznakowy "TGAC"). 
 
@@ -73,7 +74,7 @@ Problem tej klasy można interpretować na dwa sposoby. Istnieją rozwiązania a
 
 W przypadku dopasowania globalnego dwa ciągi porównywane są wzdłuż całej sekwencji. Takie rozwiązanie jest wykorzystywane przy analizie jednodomenowych białek. Algorytmem tego typu jest na przykład algorytm Needlemana-Wunscha. Schemat takiego dopasowania przedstawiono poniżej: 
 
-\begin{figure}[h]
+\begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
@@ -85,7 +86,7 @@ W przypadku dopasowania globalnego dwa ciągi porównywane są wzdłuż całej s
 
 Lokalny typ dopasowania polega na rozszerzeniu możliwości algorytmów pierwszego typu o zdolność do zauważenia podobieństw w małych obaszarach. Dla przykładu pewne sekwencje mogę być zamienione kolejnością. Ten typ rozwiązania znajduje zastosowanie w analizowaniu białek wielodomenowych.  Poniżej przedstawiono schemat dopasowania tego typu. 
 
-\begin{figure}[h]
+\begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
@@ -104,7 +105,7 @@ Dla uwidocznienia różnicy w działaniu tych dwóch typów algorytmów posłuż
 Powyższa sekwencja składa się z dwóch czteroliterowych sekwencji umieszczony w różnej kolejności. Poniżej przedstawiono macierze podobieństawa uzyskane przez oba algorytmy wraz ze znalozionymi rozwiązaniami. Proces powstawania macierzy tego typu zostanie opisany w dalszej częście tego dokumentu. 
 
 
-\begin{figure}[h]
+\begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
@@ -126,11 +127,11 @@ Dla uwidocznienia różnicy w działaniu tych dwóch typów algorytmów posłuż
 
 Jak widać, takie rozwiązanie nie jest w stanie wykryć istoty zadanego przykładu. Dla odmiany dopasowanie lokalne nie narzuca jednego najlepszego rozwiązania. Po zbudowaniu macierzy podobieństwa możemy zauważyć że istnieją dwie ścieżki punktowane w ten sam sposób. Jedna z nich repreztuje informacje o znalezieniu dopasowania podciągów "ACCA", druga o znalezieniu dopasowania podciągów "TGGA". W przypadku dużych ciągów wejściowych powyższe macierze reprezentuje się w odmienny sposób. Przyjmując pewną wartość progową można utworzyć wykres tego typu:
 
-\begin{figure}[h]
+\begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
-  \includegraphics[width=0.6\textwidth]{images/macierz.png}
+  \includegraphics[width=0.4\textwidth]{images/macierz.png}
   \end{center}
   \caption{Przykład wizualnej reprezentacji macierzy podobieństwa dla algorytmu dopasowania lokalnego}
 \end{figure}
@@ -138,7 +139,7 @@ Jak widać, takie rozwiązanie nie jest w stanie wykryć istoty zadanego przykł
 Dzięki takiemu przedstawieniu wyników możliwe jest zwrócenie uwagi na fragmenty zawierające istotne podobieństwo. 
 
 
-\subsection*{Algorytm Smitha-Watermana w ujęciu sekwencyjnym}
+\section*{Algorytm Smitha-Watermana w ujęciu sekwencyjnym}
 
 Algorym Smitha-Watermana należy do klasy algorytmów dynamicznych. Składa się z się z dwóch etapów:
 \begin{lista}
@@ -150,11 +151,11 @@ W pierwszym etapie zostaje utworzona pusta macierz. Jej wiersze odpowiadają kol
 
 W celu wypełnienia powyższej macierzy należy zauwazyć, że przy porównywaniu dwóch ciągów można mieć miesce trzy sytuacje przedstawione na poższym schemacie.
 
-\begin{figure}[h]
+\begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
-  \includegraphics[width=0.6\textwidth]{images/TypySytuacjiPrzyDopasowaniu.png}
+  \includegraphics[width=0.5\textwidth]{images/TypySytuacjiPrzyDopasowaniu.png}
   \end{center}
   \caption{Możliwe sytacje w trakcie porównywania ciągów: (1 - dopasowanie, 2 - przerwa, 3 - zamiana)}
  \end{figure}
@@ -169,7 +170,7 @@ W celu opisy kroków algorytmy posłużono się przykładem. Schemat przedstawio
 \item Punktacja za przerwe: -2
 \end{lista}
 
-\begin{figure}[h]
+\begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
@@ -217,6 +218,7 @@ W kroku 2:
 \item Ze względu na to, że litery w kolumnach (G) i rzędach (T) niesą takie same na skos dawałoby: 0 + (-3) $\simeq$ 0
 \item Najbardziej opłacalnym ruchem jest przejście z lewej strony więc zapamiętujemy ten ruch i nadajemy komórce wartość 3
 \end{lista}
+
 W kroku 3:
 \begin{lista}
 \item Wybranie drogi z lewej strony dawałoby: 3 + (-2) = 1
@@ -224,6 +226,7 @@ W kroku 3:
 \item Ze względu na to, że litery w kolumnach (G) i rzędach (T) niesą takie same na skos dawałoby: 0 + (-3) $\simeq$ 0
 \item Najbardziej opłacalnym ruchem jest przejście z lewej strony więc zapamiętujemy ten ruch i nadajemy komórce wartość 1
 \end{lista}
+
 W kroku 4:
 \begin{lista}
 \item Wybranie drogi z lewej strony dawałoby: 1 + (-2) $\simeq$ 0
@@ -234,11 +237,11 @@ W kroku 4:
 
 
 Po wykonaniu analogicznych kroków dla wszystkich komórek macierzy otrzymamy następujący stan:
-\begin{figure}[h]
+\begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
-  \includegraphics[width=0.5\textwidth]{images/SchematDzialaniaAlgorytmuPelnaMacierz.png}
+  \includegraphics[width=0.4\textwidth]{images/SchematDzialaniaAlgorytmuPelnaMacierz.png}
   \end{center}
   \caption{Całkowicie wypełniona macierz dopasowania algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
  \end{figure}
@@ -247,18 +250,18 @@ Po wykonaniu analogicznych kroków dla wszystkich komórek macierzy otrzymamy na
 W tym momencie macierz jest gotowa do wykonania drugiej fazy - backtrackingu. Polega ona na znalezieniu maksymalnej komórki i zapisaniu wszystkich kroków, które doprowadziły to ustalenie jej wartości. Poniżej przedstawiono macierz z nasiesioną ścieżką metodą backtrackingu. 
 
 Po wykonaniu analogicznych kroków dla wszystkich komórek macierzy otrzymamy stan przedstawiony na rysunku 8.
-\begin{figure}[h]
+\begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
-  \includegraphics[width=0.5\textwidth]{images/SchematDzialaniaAlgorytmuPelnaMacierzBacktracking.png}
+  \includegraphics[width=0.4\textwidth]{images/SchematDzialaniaAlgorytmuPelnaMacierzBacktracking.png}
   \end{center}
   \caption{Backtracking dla algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
  \end{figure}
 
 W efekcie uzyskany wyniki to: [$\nwarrow, \leftarrow, \nwarrow, , \nwarrow$] co należy odczytać jako: [dopasowanie, przerwa, dopasowanie, dopasowanie]. 
 Odpowiada do dopasowaniu przedstawionym na rysunku 9. 
-\begin{figure}[h]
+\begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
@@ -267,33 +270,70 @@ Odpowiada do dopasowaniu przedstawionym na rysunku 9.
   \caption{Wynika dziłania algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
  \end{figure}
 
-\subsection*{Zarys technologii CUDA}
+\section*{Zarys technologii CUDA}
 W ostatnich czasach zwiększanie wyników CPU przez zwiększanie częstotliwości zegara jednak przestało to być skutenczne. Zaczęto iść w stronę zwiększanie liczby rdzeni. Co aktualnie w przypadku procesorów jest kontynuowane. Mimio tych starań okazuję się ze karty graficzne są szybsze.
 	Atualnie karty graficzne posiadają setki rdzeni i bardzo szybką pamięć co pozwala przy odpowiednio napisanym algorytmie uzyksanie bardzo dużego przyspieszenia. Widać to na przykład w przypadku łamania haseł, dzięki obliczeniom na karcie graficzne czas metody bruteforce bardzo się skraca. 
-\begin{figure}[h]
+\begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
-  \includegraphics[width=0.4\textwidth]{images/cuda.png}
+  \includegraphics[width=0.8\textwidth]{images/cuda.png}
   \end{center}
   \caption{Porównanie progamu sekewncyjnego z równoległy }
  \end{figure}
  Przyspieszenie to nie jest tak łatwe do uzyskania jak przykładowo w OpenMP gdzie stosuje się dyrektywy. Aby uzyskać znaczne przyszpiesznie na kartach graficznych należy odpowiednio przygotować algortym. W przypadku uruchamiania go na GPU kod kernela(pojedynczej funkcji) wykonywany jest przez setki wątków. Ważne jest też używanie szybkiej pamięci karty.
 
-\subsection*{Model zwrónoleglenia Algorytmu Smitha-Watermana}
+\section*{Model zwrónoleglenia Algorytmu Smitha-Watermana}
+Zazwyczaj w algorytmach równoległych operujących na macierzach następuje podział obszarów w jenden z poniższych sposobów. 
+\begin{lista}
+\item Każdy wątek dostaję jedną kolumne lub jeden wiersz
+\item Każdy wątek dostaje jedną komórkę w kolumnie
+\item Każdy wątek dostaje jedną komórkę w wierszy
+\end{lista}
+
+Żaden z powyższych modeli nie nadaje się do zrównoleglenia algorytmu Smitha-Watermana. Wynika to z zależności, które zostały symbolicznie przedstawione na rysynku 11.
+
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.6\textwidth]{images/ZleModeleZrownoleglenia.png}
+  \end{center}
+  \caption{Zależności występujące między komórkami w trakcie obliczeń algorytmu Smitha-Watermana}
+ \end{figure}
+
+
+Na rysunkach 11, 12 przyjęto następujące oznaczenia: 
+\begin{lista}
+\item komórki szare posiadają obliczoną wartość.
+\item komórki zielone mogą być obliczane bez zależności
+\item komórki pomarańczowe są zależne od wartości innych komórek
+\item komórki białe będę rozpatrywana w przyszłości
+\end{lista} 
+
+Ze względu na wspomniane zależności przy zrównoleglaniu algorytmu Smitha-Watermana stosuje się model polegający na podziale komórek należących do tych samych przekątnych. Schemat tego podziału przedstawia rysunek 12.
+
+
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.2\textwidth]{images/DobryModelZrownoleglenia.png}
+  \end{center}
+  \caption{Prawidłowy model zrównoleglania algorytmu Smitha-Watermana}
+ \end{figure}
+
+Jak widać taki podział umożliwia wielu wątkom wykonywanie opracji na swoich komórkach bez obawy o zależności. 
+
+
+\section*{Wnioski}
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sed velit nec nibh varius suscipit. Curabitur nisi purus, porttitor in urna ut, tincidunt aliquam leo. Integer sit amet nisi egestas, congue tellus nec, gravida tellus. Nulla facilisi. Quisque ultrices sem sed arcu mattis, in eleifend lectus imperdiet. Donec ullamcorper cursus tortor, in interdum sem imperdiet non. Aliquam sit amet viverra nisl, vitae ullamcorper dolor. Pellentesque varius ex a urna blandit, ac volutpat sapien feugiat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla posuere ligula ligula, ut ullamcorper nulla tempor vitae.
 
 Vestibulum faucibus ex dolor, non suscipit enim sagittis eget. Cras et condimentum elit. Integer porta, quam ac posuere efficitur, magna mauris finibus nisi, at egestas augue diam sed risus. Ut nec nisi quis nunc sagittis volutpat at viverra eros. Donec ut porttitor orci. Mauris eget eleifend neque, id condimentum tortor. Nunc lobortis quam mi, aliquet varius dolor tempus non. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
 Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam sed auctor ex. Praesent tempus ipsum sit amet eros tempus, id ornare nulla vulputate. Nullam lobortis mi leo, ac tincidunt est volutpat dapibus. Pellentesque faucibus maximus suscipit. Duis vitae turpis in nisi condimentum finibus quis a arcu. Donec magna massa, elementum rutrum ligula at, dignissim blandit sem. Vivamus est nisl, aliquam ac tellus ac, egestas consectetur erat. Morbi commodo dui non ipsum vehicula dapibus.
-\subsection*{Wnioski}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sed velit nec nibh varius suscipit. Curabitur nisi purus, porttitor in urna ut, tincidunt aliquam leo. Integer sit amet nisi egestas, congue tellus nec, gravida tellus. Nulla facilisi. Quisque ultrices sem sed arcu mattis, in eleifend lectus imperdiet. Donec ullamcorper cursus tortor, in interdum sem imperdiet non. Aliquam sit amet viverra nisl, vitae ullamcorper dolor. Pellentesque varius ex a urna blandit, ac volutpat sapien feugiat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla posuere ligula ligula, ut ullamcorper nulla tempor vitae.
 
-Vestibulum faucibus ex dolor, non suscipit enim sagittis eget. Cras et condimentum elit. Integer porta, quam ac posuere efficitur, magna mauris finibus nisi, at egestas augue diam sed risus. Ut nec nisi quis nunc sagittis volutpat at viverra eros. Donec ut porttitor orci. Mauris eget eleifend neque, id condimentum tortor. Nunc lobortis quam mi, aliquet varius dolor tempus non. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam sed auctor ex. Praesent tempus ipsum sit amet eros tempus, id ornare nulla vulputate. Nullam lobortis mi leo, ac tincidunt est volutpat dapibus. Pellentesque faucibus maximus suscipit. Duis vitae turpis in nisi condimentum finibus quis a arcu. Donec magna massa, elementum rutrum ligula at, dignissim blandit sem. Vivamus est nisl, aliquam ac tellus ac, egestas consectetur erat. Morbi commodo dui non ipsum vehicula dapibus.
-
-\subsection*{Źródła}
+\section*{Źródła}
 Łukasz Ligowski, Witold Rudnicki - AN EFFICIENT IMPLEMENTATION OF SMITH WATERMAN ALGORITHM ON GPU USING CUDA, FOR MASSIVELY PARALLEL SCANNING OF SEQUENCE DATABASES
 
 E. Banachowicz Bioinformatyka - wykład monograficzny 
