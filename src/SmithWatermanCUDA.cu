@@ -52,6 +52,11 @@ __global__ void runCUDA(CUDA params, Column column) {
         return;
     }
 
+    __shared__ extern long columns_before_prev[];
+    __shared__ extern long columns_prev[];
+    __shared__ extern long columns_current[];
+    printf(" %d ", );
+    printf(" x = %d | ", threadIdx.x);
     match = column.before_prev[tmp_y] + (params.sequence_1[x] == params.sequence_2[tmp_y] ? g_match : g_mismatch);
     deletion = column.prev[y] + g_gap_penalty;
     insertion = column.prev[tmp_y] + g_gap_penalty;
@@ -86,9 +91,10 @@ void searchCUDA(CUDA_params &params) {
     cudaMemcpy( params.cuda.column.before_prev, params.cuda.column.prev, params.cuda.column.size, cudaMemcpyDeviceToDevice );
     cudaMemcpy( params.cuda.column.prev, params.cuda.column.current, params.cuda.column.size, cudaMemcpyDeviceToDevice );
     cudaMemset( params.cuda.column.current, 0, params.cuda.column.size );
-    runCUDA<<<params.cuda.blocks_count, params.cuda.threads_per_block>>>(params.cuda, params.cuda.column);
+    runCUDA<<<params.cuda.blocks_count, params.cuda.threads_per_block, params.sequence_2->size + 1>>>(params.cuda, params.cuda.column);
+    cudaDeviceSynchronize();
 #ifdef DEBUG
-        cudaError_t err;   
+    cudaError_t err;   
         if ((err = cudaGetLastError()) != cudaSuccess) {    
                int device;
               cudaGetDevice(&device);
@@ -99,6 +105,7 @@ void searchCUDA(CUDA_params &params) {
 
   cudaMemcpy( params.result.directions, params.cuda.directions, params.directions_size, cudaMemcpyDeviceToHost );
   cudaMemcpy( params.result.column, params.cuda.column.current, params.cuda.column.size, cudaMemcpyDeviceToHost );
+    printf("-------------------------")    ;
 
 }
 
