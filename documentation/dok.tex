@@ -160,9 +160,9 @@ W celu wypełnienia powyższej macierzy należy zauwazyć, że przy porównywani
  \end{figure}
 
 
-Dwa ciągi są do siebie podobne gdy mamy więcej sytuacji typu 1 ("dopasowanie") niż sytuacji typów 2 ("przerwa"), 3 ("zamiana"). W związku z tym spostrzeżeniem w trakcie wypełniania macierzy wartościami będziemy dodatnio punktować "dopasowania", podczas gdy "przerwy" i "zamiany" będę punktowane ujemnie. Dokładne wartości punktacji nie są elementem specyfikacji algorytmu i są dobierane w zależności od rozpatrywanego problemu. Daje to możliwość porównywania ciągów w sposób traktujący "przerwy" mniej restrykcyjnie niż "zamiany" (lub odrotnie). 
+Dwa ciągi są do siebie podobne gdy mamy więcej sytuacji typu 1 (dopasowanie) niż sytuacji typów 2 (przerwa), 3 (zamiana). W związku z tym spostrzeżeniem w trakcie wypełniania macierzy wartościami będziemy dodatnio punktować dopasowania, podczas gdy przerwy i zamiany będę punktowane ujemnie. Dokładne wartości punktacji nie są elementem specyfikacji algorytmu i są dobierane w zależności od rozpatrywanego problemu. Daje to możliwość porównywania ciągów w sposób traktujący przerwy mniej restrykcyjnie niż zamiany (lub odrotnie). 
 
-W celu opisy kroków algorytmy posłużono się przykładem. Schemat przedstawiony na rysunku 6. prezentuje pierwsze kroki wykonywane w celu wypełnienia macierzy podobieństwa. Przedstawiono przypadek dla danych wejściowych: TGGA, TGA oraz dla parametrów:
+W celu opisu kroków algorytmy posłużono się przykładem. Schemat przedstawiony na rysunku 6. prezentuje pierwsze kroki wykonywane w celu wypełnienia macierzy podobieństwa. Przedstawiono przypadek dla danych wejściowych: TGGA, TGA oraz dla parametrów:
 \begin{lista}
 \item Punktacja za dopasowanie: 5
 \item Punktacja za zamiane: -3
@@ -178,7 +178,7 @@ W celu opisy kroków algorytmy posłużono się przykładem. Schemat przedstawio
   \caption{Pierwsze cztery kroki wykonaniu algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
  \end{figure}
 
-Na początku macierz wypełniona jest zerami. Należy zwrócić uwagę na istnienie dodatkowego wiersza i kolumny (oznaczone na schematach szarą czcionką). Komórki rozpatrywane są wiersz po wierszy. Dla każdej komórki wykonywana jest sekwencja kroków mająca odpowiedzieć na następujące pytanie: "Przez którego z sąsiadów należy poprowadzić ścieżkę dopasowania tak, żeby w obecnej komórce osiągnąć najlepszy wyniki?". Przy odpowiedzi na to pytanie rozpatrywane są komórki:
+Na początku macierz wypełniona jest zerami. Należy zwrócić uwagę na istnienie dodatkowego wiersza i kolumny (oznaczone na schematach szarą czcionką). Komórki rozpatrywane są wiersz po wierszu. Dla każdej komórki wykonywana jest sekwencja kroków mająca odpowiedzieć na następujące pytanie: "Przez którego z sąsiadów należy poprowadzić ścieżkę dopasowania tak, żeby w obecnej komórce osiągnąć najlepszy wyniki?". Przy odpowiedzi na to pytanie rozpatrywane są komórki:
 \begin{lista}
 \item Na lewo - odpowiadająca wprowadzeniu przerwy w pierwszym ciągu
 \item Powyżej - odpowiadająca wprowadzeniu przerwy w drugim ciągu
@@ -283,11 +283,11 @@ W ostatnich latach zwiększanie wyników CPU przez zwiększanie częstotliwości
  Przyspieszenie to nie jest tak łatwe do uzyskania jak przykładowo w OpenMP gdzie stosuje się dyrektywy. Aby uzyskać znaczne przyszpiesznie na kartach graficznych należy odpowiednio przygotować algortym. W przypadku uruchamiania go na GPU kod kernela (pojedynczej funkcji) wykonywany jest przez setki wątków. Jest to realizacja obliczeń typu SIMD z taksonomii Flyna. 
 
 \section*{Model zwrónoleglenia Algorytmu Smitha-Watermana}
-Zazwyczaj w algorytmach równoległych operujących na macierzach następuje podział obszarów w jenden z poniższych sposobów. 
+Zazwyczaj w algorytmach równoległych operujących na macierzach następuje podział obszarów w jeden z poniższych sposobów. 
 \begin{lista}
 \item Każdy wątek dostaję jedną kolumne lub jeden wiersz
 \item Każdy wątek dostaje jedną komórkę w kolumnie
-\item Każdy wątek dostaje jedną komórkę w wierszy
+\item Każdy wątek dostaje jedną komórkę w wierszu
 \end{lista}
 
 Żaden z powyższych modeli nie nadaje się do zrównoleglenia algorytmu Smitha-Watermana. Wynika to z zależności, które zostały symbolicznie przedstawione na rysynku 11.
@@ -324,7 +324,7 @@ Ze względu na wspomniane zależności przy zrównoleglaniu algorytmu Smitha-Wat
 
 Jak widać taki podział umożliwia wielu wątkom wykonywanie operacji na swoich komórkach bez obawy o zależności. 
 
-Dodatkowo w celu zaoszczedzenia pamięci można posłyżyć się dodatkowym udoskonaleniem. Można zauważyć, że w celu obliczenia wartości komórek z n-tej przekątnej potrzebne są wartości z n-1 oraz n-2 przekątnej. Wczęsniejsze komórki nie muszę być przechowywane. Rysunek 13. przedstawia w ten sposób oszczędności pamięci.
+Dodatkowo w celu zaoszczedzenia pamięci można posłyżyć się kolejnym udoskonaleniem. Można zauważyć, że w celu obliczenia wartości komórek z n-tej przekątnej potrzebne są wartości z n-1 oraz n-2 przekątnej. Wczęsniejsze komórki nie muszę być przechowywane. Rysunek 13. przedstawia w ten sposób oszczędności pamięci.
 
 \begin{figure}[H]
   \vspace{5pt}
@@ -337,14 +337,27 @@ Dodatkowo w celu zaoszczedzenia pamięci można posłyżyć się dodatkowym udos
 
 
 \section*{Obliczenia i wnioski}
+Dokonano prób implementacji powyżej opisanej metody. Wykorzystano sprzęt NVIDIA GeForce GT 430 z zestawem zeweloperskim CUDA SDK w wersji 6.0. 
+
 Implementacja z wykorzystaniem technologii narzuca dodatkowe wymagania związane z
 \begin{lista}
 \item prawidłową komunikacji między hostem a kartą graficzną
 \item prawidłowym rozmieszczeniem danych w stosownych obszarach pamięci
 \end{lista} 
 
-Efektywne wy
+Realizacja zadania przebiegła pomyślnie tylko częściowo. Algorytm został przenisiony na kod standardu CUDA i zwraca prawidłowe wyniki. Napotkano problemy z wydajnością. Algotyrm przyspiesza w niewielkim stopniu. Poniżej przesdawiono wykres przspieszenia wyliczony z wzoru $S_{p} = \dfrac{t_{1}}{t_{\parallel}}$
 
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.6\textwidth]{images/wykres.png}
+  \end{center}
+  \caption{Przyspieszenie względne uzyskane przez program}
+ \end{figure}
+ 
+ 
+ Powyższe wyniki zostały uzyskane przez program uruchamiany dla danych wejsciowych odpowiednio 13072 oraz 12960 znakowych. Prawdopodobnie kluczowym problemem przy zrównoleglaniu algorymu jest liczne występowanie instrukcji warunkowych w trakcie obliczania punktacji komórek. Nie udało się znaleźć metody zastąpienia instrukcji if innymi instrukcjami nie zaburzającymi przyspieszenia.
 
 
 \begin{thebibliography}{9}
