@@ -60,7 +60,7 @@
 
 
 \section*{Abstrakt}
-Algorytmy dopasowania sekwencji polega na określaniu stopnia podobieństwa dwóch ciągów. Znajduje on swoje zastosowanie m. in. w bioinformatyce do poszukiwań dopasowań sekwencji nukleotydów i aminokwasów. Algorytm Smitha-Watermana rozwiązuje jeden rodzaj problemów tego typu - tzw. dopasowanie lokalne. W poniższym dokumencie przedstawiono opis algorytmu i jego zrównoleglenia z wykorzystaniem technologii CUDA. 
+Algorytm dopasowania sekwencji polega na określaniu stopnia podobieństwa dwóch ciągów. Znajduje on swoje zastosowanie m.in. w bioinformatyce do poszukiwań dopasowań sekwencji nukleotydów i aminokwasów. Algorytm Smitha-Watermana rozwiązuje jeden rodzaj problemów tego typu - tzw. dopasowanie lokalne. W poniższym dokumencie przedstawiono opis algorytmu i jego zrównoleglenia z wykorzystaniem technologii CUDA. 
 
 \section*{Przedostawienie problemu}
 
@@ -102,7 +102,7 @@ Dla uwidocznienia różnicy w działaniu tych dwóch typów algorytmów posłuż
 \item ACCATGGA
 \end{lista}
 
-Powyższa sekwencja składa się z dwóch czteroliterowych sekwencji umieszczony w różnej kolejności. Poniżej przedstawiono macierze podobieństawa uzyskane przez oba algorytmy wraz ze znalozionymi rozwiązaniami. Proces powstawania macierzy tego typu zostanie opisany w dalszej częście tego dokumentu. 
+Powyższa sekwencja składa się z dwóch czteroliterowych sekwencji umieszczonych w różnej kolejności. Poniżej przedstawiono macierze podobieństawa uzyskane przez oba algorytmy wraz ze znalozionymi rozwiązaniami. Proces powstawania macierzy tego typu zostanie opisany w dalszej częście tego dokumentu. 
 
 
 \begin{figure}[H]
@@ -115,7 +115,7 @@ Powyższa sekwencja składa się z dwóch czteroliterowych sekwencji umieszczony
  \end{figure}
 
 
-W przypadku globalnego dopasowania najlepszy uzyskany wynik jest jeden. Algorytm uzaje, że za najpesze dopasowanie należy uznać następującą interpretacje: 
+W przypadku globalnego dopasowania najlepszy uzyskany wynik jest jeden. Algorytm uzaje, że za najplepsze dopasowanie należy uznać następującą interpretację: 
 \begin{lista}
  \item Pierwszy znak został podmieniony
 \item Natępnie brakuje 4 znaków w drugim ciągu
@@ -124,7 +124,7 @@ W przypadku globalnego dopasowania najlepszy uzyskany wynik jest jeden. Algorytm
 \item Ostatnie znaki pasują do siebie
 \end{lista}
 
-Jak widać, takie rozwiązanie nie jest w stanie wykryć istoty zadanego przykładu. Dla odmiany dopasowanie lokalne nie narzuca jednego najlepszego rozwiązania. Po zbudowaniu macierzy podobieństwa możemy zauważyć, że istnieją dwie ścieżki punktowane w ten sam sposób. Jedna z nich repreztuje informacje o znalezieniu dopasowania podciągów ACCA, druga o znalezieniu dopasowania podciągów TGGA. W przypadku dużych ciągów wejściowych powyższe macierze reprezentuje się w odmienny sposób. Przyjmując pewną wartość progową można utworzyć wykres tego typu:
+Jak widać, takie rozwiązanie nie jest w stanie wykryć istoty zadanego przykładu. Dla odmiany dopasowanie lokalne nie narzuca jednego najlepszego rozwiązania. Po zbudowaniu macierzy podobieństwa możemy zauważyć, że istnieją dwie ścieżki punktowane w ten sam sposób. Jedna z nich reprezentuje informacje o znalezieniu dopasowania podciągów ACCA, druga o znalezieniu dopasowania podciągów TGGA. W przypadku dużych ciągów wejściowych powyższe macierze reprezentuje się w odmienny sposób. Przyjmując pewną wartość progową można utworzyć wykres tego typu:
 
 \begin{figure}[H]
   \vspace{5pt}
@@ -146,9 +146,9 @@ Algorym Smitha-Watermana należy do klasy algorytmów dynamicznych. Składa się
 \item Otwarzanie optymalnej ścieżki (ang. backtracking)
 \end{lista}
 
-W pierwszym etapie zostaje utworzona pusta macierz. Jej wiersze odpowiadają kolejnym znakom pierwszego ciągu, kolumny kolejnym znakom drugiego ciągu. Komórki znajdujące się na przecięcie opisują punktacje określającą w jakim stopniu dopasowanie danych dwóch znaków jest poprawne. 
+W pierwszym etapie zostaje utworzona pusta macierz. Jej wiersze odpowiadają kolejnym znakom pierwszego ciągu, kolumny kolejnym znakom drugiego ciągu. Komórki znajdujące się na przecięcie opisują punktację określającą w jakim stopniu dopasowanie danych dwóch znaków jest poprawne. 
 
-W celu wypełnienia powyższej macierzy należy zauwazyć, że przy porównywaniu dwóch ciągów można mieć miesce trzy sytuacje przedstawione na poższym schemacie.
+W celu wypełnienia powyższej macierzy należy zauwazyć, że przy porównywaniu dwóch ciągów mogą mieć miejsce trzy sytuacje przedstawione na poniższym schemacie.
 
 \begin{figure}[H]
   \vspace{5pt}
@@ -160,13 +160,13 @@ W celu wypełnienia powyższej macierzy należy zauwazyć, że przy porównywani
  \end{figure}
 
 
-Dwa ciągi są do siebie podobne gdy mamy więcej sytuacji typu 1 (dopasowanie) niż sytuacji typów 2 (przerwa), 3 (zamiana). W związku z tym spostrzeżeniem w trakcie wypełniania macierzy wartościami będziemy dodatnio punktować dopasowania, podczas gdy przerwy i zamiany będę punktowane ujemnie. Dokładne wartości punktacji nie są elementem specyfikacji algorytmu i są dobierane w zależności od rozpatrywanego problemu. Daje to możliwość porównywania ciągów w sposób traktujący przerwy mniej restrykcyjnie niż zamiany (lub odrotnie). 
+Dwa ciągi są do siebie podobne gdy mamy więcej sytuacji typu 1 (dopasowanie) niż sytuacji typów 2 (przerwa), 3 (zamiana). W związku z tym spostrzeżeniem w trakcie wypełniania macierzy wartościami będziemy dodatnio punktować dopasowania, podczas gdy przerwy i zamiany będę punktowane ujemnie. Dokładne wartości punktacji nie są elementem specyfikacji algorytmu i są dobierane w zależności od rozpatrywanego problemu. Daje to możliwość porównywania ciągów w sposób traktujący przerwy mniej restrykcyjnie niż zamiany (lub odwrotnie). 
 
-W celu opisu kroków algorytmy posłużono się przykładem. Schemat przedstawiony na rysunku 6. prezentuje pierwsze kroki wykonywane w celu wypełnienia macierzy podobieństwa. Przedstawiono przypadek dla danych wejściowych: TGGA, TGA oraz dla parametrów:
+W celu opisu kroków algorytmu posłużono się przykładem. Schemat przedstawiony na rysunku 6. prezentuje pierwsze kroki wykonywane w celu wypełnienia macierzy podobieństwa. Przedstawiono przypadek dla danych wejściowych: TGGA, TGA oraz dla parametrów:
 \begin{lista}
 \item Punktacja za dopasowanie: 5
-\item Punktacja za zamiane: -3
-\item Punktacja za przerwe: -2
+\item Punktacja za zamianę: -3
+\item Punktacja za przerwę: -2
 \end{lista}
 
 \begin{figure}[H]
@@ -175,7 +175,7 @@ W celu opisu kroków algorytmy posłużono się przykładem. Schemat przedstawio
   \begin{center}
   \includegraphics[width=0.6\textwidth]{images/SchematDzialaniaAlgorytmu.png}
   \end{center}
-  \caption{Pierwsze cztery kroki wykonaniu algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
+  \caption{Pierwsze cztery kroki wykonania algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
  \end{figure}
 
 Na początku macierz wypełniona jest zerami. Należy zwrócić uwagę na istnienie dodatkowego wiersza i kolumny (oznaczone na schematach szarą czcionką). Komórki rozpatrywane są wiersz po wierszu. Dla każdej komórki wykonywana jest sekwencja kroków mająca odpowiedzieć na następujące pytanie: "Przez którego z sąsiadów należy poprowadzić ścieżkę dopasowania tak, żeby w obecnej komórce osiągnąć najlepszy wyniki?". Przy odpowiedzi na to pytanie rozpatrywane są komórki:
@@ -200,22 +200,22 @@ Tą procedurę można przedstawić w pseudokodzie w następujący sposób.
 	rememberDecision();
 \end{lstlisting}
 
-Prześledźmy kolejne kroki wykonania przykładu z rysunku 6. Warto przy tej okazji zwrócić uwagę na fakt, że w algorytmie Smitha-Watermana celowo unika się wprowadzania do macierzy ujemnych wartości. Względu na to w poniższym opisie zastosowano znak $\simeq$ wszędzie tam, gdzie zamiast wartości ujemnej podstawiane jest 0.
+Prześledźmy kolejne kroki wykonania przykładu z rysunku 6. Warto przy tej okazji zwrócić uwagę na fakt, że w algorytmie Smitha-Watermana celowo unika się wprowadzania do macierzy ujemnych wartości. Ze względu na to w poniższym opisie zastosowano znak $\simeq$ wszędzie tam, gdzie zamiast wartości ujemnej podstawiane jest 0.
 
 W kroku 1:
 \begin{lista}
 \item Wybranie drogi z lewej strony dawałoby: 0 + (-2) $\simeq$ 0
 \item Wybranie drogi z góry dawałoby : 0 + (-2) $\simeq$ 0
-\item Ze względu na to, że litery w kolumnach (T) i rzędach (T) są takie same przejście na skos dawałoby: 0 + 5 = 5
-\item Najbardziej opłacalnym ruchem jest przejście na skos więc zapamiętujemy ten ruch i nadajemy komórce wartość 5
+\item Ze względu na to, że litery w kolumnach (T) i rzędach (T) są takie same, przejście na skos dawałoby: 0 + 5 = 5
+\item Najbardziej opłacalnym ruchem jest przejście na skos, więc zapamiętujemy ten ruch i nadajemy komórce wartość 5
 \end{lista}
 
 W kroku 2:
 \begin{lista}
 \item Wybranie drogi z lewej strony dawałoby: 5 + (-2) = 3
-\item Wybranie drogi z góry dawałoby : 0 + (-2) $\simeq$ 0
-\item Ze względu na to, że litery w kolumnach (G) i rzędach (T) niesą takie same na skos dawałoby: 0 + (-3) $\simeq$ 0
-\item Najbardziej opłacalnym ruchem jest przejście z lewej strony więc zapamiętujemy ten ruch i nadajemy komórce wartość 3
+\item Wybranie drogi z góry dawałoby: 0 + (-2) $\simeq$ 0
+\item Ze względu na to, że litery w kolumnach (G) i rzędach (T) nie są takie same, na skos dawałoby: 0 + (-3) $\simeq$ 0
+\item Najbardziej opłacalnym ruchem jest przejście z lewej strony, więc zapamiętujemy ten ruch i nadajemy komórce wartość 3
 \end{lista}
 
 W kroku 3:
@@ -229,9 +229,9 @@ W kroku 3:
 W kroku 4:
 \begin{lista}
 \item Wybranie drogi z lewej strony dawałoby: 1 + (-2) $\simeq$ 0
-\item Wybranie drogi z góry dawałoby : 0 + (-2) $\simeq$ 0
-\item Ze względu na to, że litery w kolumnach (A) i rzędach (T) niesą takie same na skos dawałoby: 0 + (-3) $\simeq$ 0
-\item W tym momencie wszystkie drogi dają taką samą wartośc nie zapamiętujemy kierunku i nadajemy komórce wartość 0.
+\item Wybranie drogi z góry dawałoby: 0 + (-2) $\simeq$ 0
+\item Ze względu na to, że litery w kolumnach (A) i rzędach (T) nie są takie same na skos dawałoby: 0 + (-3) $\simeq$ 0
+\item W tym momencie wszystkie drogi dają taką samą wartośc, nie zapamiętujemy kierunku i nadajemy komórce wartość 0.
 \end{lista}
 
 
@@ -246,7 +246,7 @@ Po wykonaniu analogicznych kroków dla wszystkich komórek macierzy otrzymamy na
  \end{figure}
 
 
-W tym momencie macierz jest gotowa do wykonania drugiej fazy - backtrackingu. Polega ona na znalezieniu maksymalnej komórki i zapisaniu wszystkich kroków, które doprowadziły to ustalenie jej wartości. Poniżej przedstawiono macierz z nasiesioną ścieżką metodą backtrackingu. 
+W tym momencie macierz jest gotowa do wykonania drugiej fazy - backtrackingu. Polega ona na znalezieniu maksymalnej komórki i zapisaniu wszystkich kroków, które doprowadziły to ustalenie jej wartości. Poniżej przedstawiono macierz z naniesioną ścieżką metody backtrackingu. 
 
 Po wykonaniu analogicznych kroków dla wszystkich komórek macierzy otrzymamy stan przedstawiony na rysunku 8.
 \begin{figure}[H]
@@ -258,29 +258,29 @@ Po wykonaniu analogicznych kroków dla wszystkich komórek macierzy otrzymamy st
   \caption{Backtracking dla algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
  \end{figure}
 
-W efekcie uzyskany wyniki to: [$\nwarrow, \leftarrow, \nwarrow, , \nwarrow$] co należy odczytać jako: [dopasowanie, przerwa, dopasowanie, dopasowanie]. 
-Odpowiada do dopasowaniu przedstawionym na rysunku 9. 
+W efekcie uzyskane wyniki to: [$\nwarrow, \leftarrow, \nwarrow, , \nwarrow$] co należy odczytać jako: [dopasowanie, przerwa, dopasowanie, dopasowanie]. 
+Odpowiada to dopasowaniu przedstawionym na rysunku 9. 
 \begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
   \includegraphics[width=0.1\textwidth]{images/uzyskaneDopasowanie.png}
   \end{center}
-  \caption{Wynika dziłania algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
+  \caption{Wynik działania algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
  \end{figure}
 
 \section*{Zarys technologii CUDA}
-W ostatnich latach zwiększanie wyników CPU przez zwiększanie częstotliwości zegara przestało być skutenczne. Zaczęto szukać rozwiązań polegających na zwiększaniu liczby rdzeni działających równolegle. W przypadku procesorów trend ten jest utrzymywany, jednak zauważono, że znaczące polepszenie wyników można także uzyskać stosując karty graficzne. Potokowy charakter obliczeń graficznych zaowocował powastniem całej rodziny architektur wyspecjalizowanych w równoległym wykonywaniu tego typu zadań. W efekcie karty te zostały wyposażone w środowiska programistyczne dające możliwość wykonywania obliczeń o ogólnym charakterze. Jednym z takich rozwiązań jest CUDA (ang. Compute Unified Device Architecture) - standard opracowany przez firmie NVidia. 
-	Aktualnie karty graficzne posiadają setki rdzeni i bardzo szybką pamięć co pozwala przy odpowiednio napisanym algorytmie uzyskanie bardzo dużego przyspieszenia. Widać to na przykład w przypadku łamania haseł, dzięki obliczeniom na karcie graficzne czas metody bruteforce bardzo się skraca. 
+W ostatnich latach wzrost wydajności CPU był osiągany przez przez zwiększanie częstotliwości zegara, co jednak przestało być skuteczne. Zaczęto szukać rozwiązań polegających na zwiększaniu liczby rdzeni działających równolegle. W przypadku procesorów trend ten jest utrzymywany, jednak zauważono, że znaczące polepszenie wyników można także uzyskać stosując karty graficzne. Potokowy charakter obliczeń graficznych zaowocował powstaniem całej rodziny architektur wyspecjalizowanych w równoległym wykonywaniu tego typu zadań. W efekcie karty te zostały wyposażone w środowiska programistyczne dające możliwość wykonywania obliczeń o ogólnym charakterze. Jednym z takich rozwiązań jest CUDA (ang. Compute Unified Device Architecture) - standard opracowany przez firmę NVidia. 
+	Aktualnie karty graficzne posiadają setki rdzeni i bardzo szybką pamięć, co pozwala przy odpowiednio napisanym algorytmie na uzyskanie bardzo dużego przyspieszenia. Widać to na przykład w przypadku łamania haseł, dzięki obliczeniom na karcie graficznej czas metody bruteforce bardzo się skraca. 
 \begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
   \includegraphics[width=1.0\textwidth]{images/cuda.png}
   \end{center}
-  \caption{Porównanie progamu sekewncyjnego z równoległego napisanego w standardzie CUDA - przykład szkoleniowy z materiałów firmy NVidia}
+  \caption{Porównanie progamu sekwencyjnego i równoległego napisanego w standardzie CUDA - przykład szkoleniowy z materiałów firmy NVidia}
  \end{figure}
- Przyspieszenie to nie jest tak łatwe do uzyskania jak przykładowo w OpenMP gdzie stosuje się dyrektywy. Aby uzyskać znaczne przyszpiesznie na kartach graficznych należy odpowiednio przygotować algortym. W przypadku uruchamiania go na GPU kod kernela (pojedynczej funkcji) wykonywany jest przez setki wątków. Jest to realizacja obliczeń typu SIMD z taksonomii Flyna. 
+ Przyspieszenie to nie jest tak łatwe do uzyskania, jak przykładowo w OpenMP, gdzie stosuje się dyrektywy. Aby uzyskać znaczne przyspiesznie na kartach graficznych należy odpowiednio przygotować algorytm. W przypadku uruchamiania go na GPU kod kernela (pojedynczej funkcji) wykonywany jest przez setki wątków. Jest to realizacja obliczeń typu SIMD z taksonomii Flyna. 
 
 \section*{Model zwrónoleglenia Algorytmu Smitha-Watermana}
 Zazwyczaj w algorytmach równoległych operujących na macierzach następuje podział obszarów w jeden z poniższych sposobów. 
@@ -290,7 +290,7 @@ Zazwyczaj w algorytmach równoległych operujących na macierzach następuje pod
 \item Każdy wątek dostaje jedną komórkę w wierszu
 \end{lista}
 
-Żaden z powyższych modeli nie nadaje się do zrównoleglenia algorytmu Smitha-Watermana. Wynika to z zależności, które zostały symbolicznie przedstawione na rysynku 11.
+Żaden z powyższych modeli nie nadaje się do zrównoleglenia algorytmu Smitha-Watermana. Wynika to z zależności, które zostały symbolicznie przedstawione na rysunku 11.
 
 \begin{figure}[H]
   \vspace{5pt}
@@ -324,7 +324,7 @@ Ze względu na wspomniane zależności przy zrównoleglaniu algorytmu Smitha-Wat
 
 Jak widać taki podział umożliwia wielu wątkom wykonywanie operacji na swoich komórkach bez obawy o zależności. 
 
-Dodatkowo w celu zaoszczedzenia pamięci można posłyżyć się kolejnym udoskonaleniem. Można zauważyć, że w celu obliczenia wartości komórek z n-tej przekątnej potrzebne są wartości z n-1 oraz n-2 przekątnej. Wczęsniejsze komórki nie muszę być przechowywane. Rysunek 13. przedstawia w ten sposób oszczędności pamięci.
+Dodatkowo w celu zaoszczedzenia pamięci można posłużyć się kolejnym udoskonaleniem. Można zauważyć, że w celu obliczenia wartości komórek z n-tej przekątnej potrzebne są wartości z n-1 oraz n-2 przekątnej. Wcześniejsze komórki nie muszę być przechowywane. Rysunek 13. przedstawia w ten sposób oszczędności pamięci.
 
 \begin{figure}[H]
   \vspace{5pt}
@@ -337,15 +337,15 @@ Dodatkowo w celu zaoszczedzenia pamięci można posłyżyć się kolejnym udosko
 
 
 \section*{Obliczenia i wnioski}
-Dokonano prób implementacji powyżej opisanej metody. Wykorzystano sprzęt NVIDIA GeForce GT 430 z zestawem zeweloperskim CUDA SDK w wersji 6.0. 
+Dokonano prób implementacji powyżej opisanej metody. Wykorzystano sprzęt NVIDIA GeForce GT 430 z zestawem deweloperskim CUDA SDK w wersji 6.0. 
 
 Implementacja z wykorzystaniem technologii narzuca dodatkowe wymagania związane z
 \begin{lista}
-\item prawidłową komunikacji między hostem a kartą graficzną
+\item prawidłową komunikacją między hostem a kartą graficzną
 \item prawidłowym rozmieszczeniem danych w stosownych obszarach pamięci
 \end{lista} 
 
-Realizacja zadania przebiegła pomyślnie tylko częściowo. Algorytm został przenisiony na kod standardu CUDA i zwraca prawidłowe wyniki. Napotkano problemy z wydajnością. Algotyrm przyspiesza w niewielkim stopniu. Poniżej przesdawiono wykres przspieszenia wyliczony z wzoru $S_{p} = \dfrac{t_{1}}{t_{\parallel}}$
+Realizacja zadania przebiegła pomyślnie tylko częściowo. Algorytm został przenisiony na kod standardu CUDA i zwraca prawidłowe wyniki. Napotkano problemy z wydajnością. Algorytm przyspiesza w niewielkim stopniu. Poniżej przedstawiono wykres przspieszenia wyliczony ze wzoru $S_{p} = \dfrac{t_{1}}{t_{\parallel}}$
 
 \begin{figure}[H]
   \vspace{5pt}
@@ -357,7 +357,7 @@ Realizacja zadania przebiegła pomyślnie tylko częściowo. Algorytm został pr
  \end{figure}
  
  
- Powyższe wyniki zostały uzyskane przez program uruchamiany dla danych wejsciowych odpowiednio 13072 oraz 12960 znakowych. Prawdopodobnie kluczowym problemem przy zrównoleglaniu algorymu jest liczne występowanie instrukcji warunkowych w trakcie obliczania punktacji komórek. Nie udało się znaleźć metody zastąpienia instrukcji if innymi instrukcjami nie zaburzającymi przyspieszenia.
+ Powyższe wyniki zostały uzyskane przez program uruchamiany dla danych wejściowych odpowiednio 13072 oraz 12960 znakowych. Prawdopodobnie kluczowym problemem przy zrównoleglaniu algorytmu jest liczne występowanie instrukcji warunkowych w trakcie obliczania punktacji komórek. Nie udało się znaleźć metody zastąpienia instrukcji if innymi instrukcjami nie zaburzającymi przyspieszenia.
 
 
 \begin{thebibliography}{9}
