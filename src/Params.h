@@ -13,6 +13,7 @@ class Params {
         static int mismatch;
         static int gapPenalty;
         static int charPerRow;
+        static int threads_per_block;
 
         static Sequence sequence1;
         static Sequence sequence2;

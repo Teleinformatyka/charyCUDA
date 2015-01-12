@@ -56,8 +56,8 @@ SmithWaterman::SmithWaterman(Params &params)
     m_cudaParams.cuda.mismatch = Params::mismatch;
     m_cudaParams.cuda.gap_penalty = Params::gapPenalty;
 
-    m_cudaParams.cuda.cells_per_thread = 64;
-    m_cudaParams.cuda.threads_per_block = 1024;
+    m_cudaParams.cuda.cells_per_thread = 24;
+    m_cudaParams.cuda.threads_per_block = Params::threads_per_block;
     m_cudaParams.cuda.threads_count = ceil((float)m_size_y / (float)m_cudaParams.cuda.cells_per_thread);
     m_cudaParams.cuda.blocks_count = ceil((float)m_cudaParams.cuda.threads_count / (float)m_cudaParams.cuda.threads_per_block);
 
@@ -72,6 +72,7 @@ SmithWaterman::SmithWaterman(Params &params)
     m_best_score = 0;
     m_best_path_value = 0;
     m_result = "";
+    m_duration = 0;
 
 
 }
@@ -83,21 +84,27 @@ SmithWaterman::~SmithWaterman() {
 void SmithWaterman::search() {
 
     cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-    cudaEventRecord(start, 0);
 
     long max_value, value;
 
 
     initCUDA(m_cudaParams);
+    float duration = 0;
 
     max_value = 0;
     for(int iteration=0; iteration<(m_size_x+(m_size_y/m_cudaParams.cuda.threads_count)); iteration++){
 
         m_cudaParams.cuda.iteration = iteration;
+        cudaEventCreate(&start);
+        cudaEventCreate(&stop);
+        cudaEventRecord(start, 0);
 
         searchCUDA(m_cudaParams);
+        cudaEventRecord(stop, 0);
+        cudaEventSynchronize(stop);
+
+        cudaEventElapsedTime(&duration, start, stop);
+        m_duration += duration;
 
         value = *std::max_element(m_cudaParams.result.column, m_cudaParams.result.column+m_size_y + 1);
         if(value > max_value){
@@ -127,10 +134,6 @@ void SmithWaterman::search() {
 
 
     deinitCUDA(m_cudaParams.cuda);
-    cudaEventRecord(stop, 0);
-    cudaEventSynchronize(stop);
-
-    cudaEventElapsedTime(&m_duration, start, stop);
 }
 
 // -------------------------------------------------------------------------------------------
@@ -286,7 +289,7 @@ void SmithWaterman::print(){
 
     std::cout << std::endl;
 
-    std::cout << m_result << std::endl;
+    // std::cout << m_result << std::endl;
 }
 
 

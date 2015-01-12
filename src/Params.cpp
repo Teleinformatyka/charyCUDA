@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <new>
+#include <cstdlib>
 
 #include "Params.h"
 
@@ -8,6 +9,7 @@ int Params::match = 5;
 int Params::mismatch = -3;
 int Params::gapPenalty = -4;
 int Params::charPerRow = 100;
+int Params::threads_per_block = 1024;
 
 Sequence Params::sequence1;
 Sequence Params::sequence2;
@@ -30,6 +32,9 @@ bool Params::parse(int argc, char **argv) {
     if (argc < 3) {
         printUsage();
         return 0;
+    }
+    if (argc > 4) {
+        Params::threads_per_block = std::atoi(argv[3]);
     }
     std::ifstream file(argv[1]);
     if (!file.is_open()) {
