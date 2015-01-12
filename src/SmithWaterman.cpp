@@ -281,10 +281,7 @@ void SmithWaterman::print(){
     std::cout << "Size of #1: " << m_sequence1.size << std::endl;
     std::cout << "Size of #2: " << m_sequence2.size << std::endl;
 
-    std::cout << "Score: " << m_best_score << std::endl;
     std::cout << "Finded path: " << m_paths.size() << std::endl;
-    std::cout << "Threads: " << m_threads_count << std::endl;
-
     std::cout << "Time: " << m_duration << "ms" << std::endl;
 
     std::cout << std::endl;

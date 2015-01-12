@@ -13,6 +13,13 @@ if ((err = cudaGetLastError()) != cudaSuccess) {    \
     printf("CUDA error on GPU %d: %s : %s, line %d\n", device, cudaGetErrorString(err), __FILE__, __LINE__); }}while(0);
 
 
+__constant__ int g_match;
+__constant__ int g_mismatch;
+__constant__ int g_gap_penalty;
+
+
+
+
 
 __device__ void get_value(long long match, long long deletion, long long insertion, long long &value, char &direction){
     value = max((long long)0, max(match, max(deletion, insertion)));
@@ -40,9 +47,9 @@ __global__ void runCUDA(CUDA params, Column column) {
     char direction = 0;
 
 
-    match = column.before_prev[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? params.match : params.mismatch);
-    deletion = column.prev[y] + params.gap_penalty;
-    insertion = column.prev[y-1] + params.gap_penalty;
+    match = column.before_prev[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? g_match : g_mismatch);
+    deletion = column.prev[y] + g_gap_penalty;
+    insertion = column.prev[y-1] + g_gap_penalty;
 
     get_value(match, deletion, insertion, value, direction);
 
@@ -52,9 +59,9 @@ __global__ void runCUDA(CUDA params, Column column) {
     y++;
 
     while(y < end_y && y <= params.rows_count && x >= 0 && x < params.columns_count){
-        match = column.prev[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? params.match : params.mismatch);
-        deletion = column.prev[y] + params.gap_penalty;
-        insertion = column.current[y-1] + params.gap_penalty;
+        match = column.prev[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? g_match : g_mismatch);
+        deletion = column.prev[y] + g_gap_penalty;
+        insertion = column.current[y-1] + g_gap_penalty;
 
         get_value(match, deletion, insertion, value, direction);
 
@@ -67,19 +74,20 @@ __global__ void runCUDA(CUDA params, Column column) {
 
 }
 void searchCUDA(CUDA_params &params) {
-  cudaMemset( params.cuda.directions, 0, params.directions_size );
-  cudaMemcpy( params.cuda.column.before_prev, params.cuda.column.prev, params.cuda.column.size, cudaMemcpyDeviceToDevice );
-  cudaMemcpy( params.cuda.column.prev, params.cuda.column.current, params.cuda.column.size, cudaMemcpyDeviceToDevice );
-  cudaMemset( params.cuda.column.current, 0, params.cuda.column.size );
- runCUDA<<<params.cuda.blocks_count, params.cuda.threads_per_block>>>(params.cuda, params.cuda.column);
- cudaError_t err;   
-    if ((err = cudaGetLastError()) != cudaSuccess) {    
-            int device;
-        cudaGetDevice(&device);
-    printf("CUDA error on GPU %d: %s : %s, line %d\n", device, cudaGetErrorString(err), __FILE__, __LINE__); 
-    return ;
-    }
-
+    cudaMemset( params.cuda.directions, 0, params.directions_size );
+    cudaMemcpy( params.cuda.column.before_prev, params.cuda.column.prev, params.cuda.column.size, cudaMemcpyDeviceToDevice );
+    cudaMemcpy( params.cuda.column.prev, params.cuda.column.current, params.cuda.column.size, cudaMemcpyDeviceToDevice );
+    cudaMemset( params.cuda.column.current, 0, params.cuda.column.size );
+    runCUDA<<<params.cuda.blocks_count, params.cuda.threads_per_block>>>(params.cuda, params.cuda.column);
+#ifdef DEBUG
+        cudaError_t err;   
+        if ((err = cudaGetLastError()) != cudaSuccess) {    
+               int device;
+              cudaGetDevice(&device);
+          printf("CUDA error on GPU %d: %s : %s, line %d\n", device, cudaGetErrorString(err), __FILE__, __LINE__); 
+          return ;
+        }
+#endif
 
   cudaMemcpy( params.result.directions, params.cuda.directions, params.directions_size, cudaMemcpyDeviceToHost );
   cudaMemcpy( params.result.column, params.cuda.column.current, params.cuda.column.size, cudaMemcpyDeviceToHost );
@@ -104,6 +112,21 @@ void initCUDA(CUDA_params &params) {
 
     cudaMemset( params.cuda.column.current, 0, params.cuda.column.size );
     cudaMemset( params.cuda.column.before_prev, 0, params.cuda.column.size );
+    
+    cudaMemcpyToSymbol(g_mismatch, &params.cuda.mismatch, sizeof(params.cuda.mismatch));
+    cudaMemcpyToSymbol(g_match, &params.cuda.match, sizeof(params.cuda.match));
+    cudaMemcpyToSymbol(g_gap_penalty, &params.cuda.gap_penalty, sizeof(params.cuda.gap_penalty));
+
+#ifdef DEBUG
+    cudaError_t err;   
+    if ((err = cudaGetLastError()) != cudaSuccess) {    
+           int device;
+          cudaGetDevice(&device);
+      printf("CUDA error on GPU %d: %s : %s, line %d\n", device, cudaGetErrorString(err), __FILE__, __LINE__); 
+      return ;
+    }
+#endif
+
 
 }
 
