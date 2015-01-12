@@ -33,7 +33,7 @@ else
       TARGET := release
 endif
 
-ALL_CCFLAGS := 
+ALL_CCFLAGS := -D'DEBUG'
 ALL_CCFLAGS += $(NVCCFLAGS)
 ALL_CCFLAGS += $(EXTRA_NVCCFLAGS)
 ALL_CCFLAGS += $(addprefix -Xcompiler ,$(CCFLAGS))
@@ -80,7 +80,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cu
 	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $
-	$(CXX) $(CFLAGS)  -o  $@  -c $?
+	$(CXX) $(ALL_CCFLAGS) $(CFLAGS)  -o  $@  -c $?
 
 chary: $(OBJ)
 	$(CXX) $? -L$(CUDA_PATH)/lib64 -lcudart -lcuda    -o $@
