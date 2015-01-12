@@ -16,12 +16,13 @@ if ((err = cudaGetLastError()) != cudaSuccess) {    \
 __constant__ int g_match;
 __constant__ int g_mismatch;
 __constant__ int g_gap_penalty;
+__constant__ int g_rows_count;
 
 
 
 
 
-__device__ void get_value(long long match, long long deletion, long long insertion, long long &value, char &direction){
+__device__ inline  void get_value(long long match, long long deletion, long long insertion, long long &value, char &direction){
     value = max((long long)0, max(match, max(deletion, insertion)));
   direction = 0;
 
@@ -43,30 +44,37 @@ __global__ void runCUDA(CUDA params, Column column) {
     int x = params.iteration - id;
     int y = id * params.cells_per_thread + 1;
     int end_y = y + params.cells_per_thread;
+    
+    int tmp_y = y - 1;
 
     char direction = 0;
+    if (x < 0 ||  x >= params.columns_count) {
+        return;
+    }
 
-
-    match = column.before_prev[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? g_match : g_mismatch);
+    match = column.before_prev[tmp_y] + (params.sequence_1[x] == params.sequence_2[tmp_y] ? g_match : g_mismatch);
     deletion = column.prev[y] + g_gap_penalty;
-    insertion = column.prev[y-1] + g_gap_penalty;
+    insertion = column.prev[tmp_y] + g_gap_penalty;
 
     get_value(match, deletion, insertion, value, direction);
 
     column.current[y] = value;
-    params.directions[y-1] = direction;
+    params.directions[tmp_y] = direction;
+
 
     y++;
 
-    while(y < end_y && y <= params.rows_count && x >= 0 && x < params.columns_count){
-        match = column.prev[y-1] + (params.sequence_1[x] == params.sequence_2[y-1] ? g_match : g_mismatch);
+    while(y < end_y && y <= g_rows_count ){
+        tmp_y = y - 1;
+
+        match = column.prev[tmp_y] + (params.sequence_1[x] == params.sequence_2[tmp_y] ? g_match : g_mismatch);
         deletion = column.prev[y] + g_gap_penalty;
-        insertion = column.current[y-1] + g_gap_penalty;
+        insertion = column.current[tmp_y] + g_gap_penalty;
 
         get_value(match, deletion, insertion, value, direction);
 
         column.current[y] = value;
-        params.directions[y-1] = direction;
+        params.directions[tmp_y] = direction;
 
         y++;
     }
@@ -116,6 +124,7 @@ void initCUDA(CUDA_params &params) {
     cudaMemcpyToSymbol(g_mismatch, &params.cuda.mismatch, sizeof(params.cuda.mismatch));
     cudaMemcpyToSymbol(g_match, &params.cuda.match, sizeof(params.cuda.match));
     cudaMemcpyToSymbol(g_gap_penalty, &params.cuda.gap_penalty, sizeof(params.cuda.gap_penalty));
+    cudaMemcpyToSymbol(g_rows_count, &params.cuda.rows_count, sizeof(params.cuda.rows_count));
 
 #ifdef DEBUG
     cudaError_t err;   
