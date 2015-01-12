@@ -60,7 +60,7 @@
 
 
 \section*{Abstrakt}
-Algorytmy dopasowania sekwencji znajduje swoje zastosowanie m. in. w bioinformatyce do poszukiwań dopasowań sekwencji nukleotydów i aminokwasów. Algorytm Smitha-Watermana należy do podgrupy rozwiązań zajmujących jest tzw. dopasowaniem lokalnym. W poniższym dokumencie przedstawiono opis prób zrównoleglenia tego algorytmu z wykorzystaniem technologii CUDA. 
+Algorytmy dopasowania sekwencji polega na określaniu stopnia podobieństwa dwóch ciągów. Znajduje on swoje zastosowanie m. in. w bioinformatyce do poszukiwań dopasowań sekwencji nukleotydów i aminokwasów. Algorytm Smitha-Watermana rozwiązuje jeden rodzaj problemów tego typu - tzw. dopasowanie lokalne. W poniższym dokumencie przedstawiono opis algorytmu i jego zrównoleglenia z wykorzystaniem technologii CUDA. 
 
 \section*{Przedostawienie problemu}
 
@@ -84,7 +84,7 @@ W przypadku dopasowania globalnego dwa ciągi porównywane są wzdłuż całej s
  \end{figure}
   
 
-Lokalny typ dopasowania polega na rozszerzeniu możliwości algorytmów pierwszego typu o zdolność do zauważenia podobieństw w małych obaszarach. Dla przykładu pewne sekwencje mogę być zamienione kolejnością. Ten typ rozwiązania znajduje zastosowanie w analizowaniu białek wielodomenowych.  Poniżej przedstawiono schemat dopasowania tego typu. 
+Lokalny typ dopasowania polega na rozszerzeniu możliwości algorytmów pierwszego typu o zdolność do zauważenia podobieństw w małych obaszarach. Dla przykładu pewne sekwencje mogą być zamienione kolejnością. Ten typ rozwiązania znajduje zastosowanie w analizowaniu białek wielodomenowych.  Poniżej przedstawiono schemat dopasowania tego typu. 
 
 \begin{figure}[H]
   \vspace{5pt}
@@ -116,7 +116,6 @@ Powyższa sekwencja składa się z dwóch czteroliterowych sekwencji umieszczony
 
 
 W przypadku globalnego dopasowania najlepszy uzyskany wynik jest jeden. Algorytm uzaje, że za najpesze dopasowanie należy uznać następującą interpretacje: 
-Dla uwidocznienia różnicy w działaniu tych dwóch typów algorytmów posłużmy się przykładem następujących ciągów:
 \begin{lista}
  \item Pierwszy znak został podmieniony
 \item Natępnie brakuje 4 znaków w drugim ciągu
@@ -125,7 +124,7 @@ Dla uwidocznienia różnicy w działaniu tych dwóch typów algorytmów posłuż
 \item Ostatnie znaki pasują do siebie
 \end{lista}
 
-Jak widać, takie rozwiązanie nie jest w stanie wykryć istoty zadanego przykładu. Dla odmiany dopasowanie lokalne nie narzuca jednego najlepszego rozwiązania. Po zbudowaniu macierzy podobieństwa możemy zauważyć że istnieją dwie ścieżki punktowane w ten sam sposób. Jedna z nich repreztuje informacje o znalezieniu dopasowania podciągów "ACCA", druga o znalezieniu dopasowania podciągów "TGGA". W przypadku dużych ciągów wejściowych powyższe macierze reprezentuje się w odmienny sposób. Przyjmując pewną wartość progową można utworzyć wykres tego typu:
+Jak widać, takie rozwiązanie nie jest w stanie wykryć istoty zadanego przykładu. Dla odmiany dopasowanie lokalne nie narzuca jednego najlepszego rozwiązania. Po zbudowaniu macierzy podobieństwa możemy zauważyć, że istnieją dwie ścieżki punktowane w ten sam sposób. Jedna z nich repreztuje informacje o znalezieniu dopasowania podciągów ACCA, druga o znalezieniu dopasowania podciągów TGGA. W przypadku dużych ciągów wejściowych powyższe macierze reprezentuje się w odmienny sposób. Przyjmując pewną wartość progową można utworzyć wykres tego typu:
 
 \begin{figure}[H]
   \vspace{5pt}
@@ -271,17 +270,17 @@ Odpowiada do dopasowaniu przedstawionym na rysunku 9.
  \end{figure}
 
 \section*{Zarys technologii CUDA}
-W ostatnich czasach zwiększanie wyników CPU przez zwiększanie częstotliwości zegara jednak przestało to być skutenczne. Zaczęto iść w stronę zwiększanie liczby rdzeni. Co aktualnie w przypadku procesorów jest kontynuowane. Mimio tych starań okazuję się ze karty graficzne są szybsze.
-	Atualnie karty graficzne posiadają setki rdzeni i bardzo szybką pamięć co pozwala przy odpowiednio napisanym algorytmie uzyksanie bardzo dużego przyspieszenia. Widać to na przykład w przypadku łamania haseł, dzięki obliczeniom na karcie graficzne czas metody bruteforce bardzo się skraca. 
+W ostatnich latach zwiększanie wyników CPU przez zwiększanie częstotliwości zegara przestało być skutenczne. Zaczęto szukać rozwiązań polegających na zwiększaniu liczby rdzeni działających równolegle. W przypadku procesorów trend ten jest utrzymywany, jednak zauważono, że znaczące polepszenie wyników można także uzyskać stosując karty graficzne. Potokowy charakter obliczeń graficznych zaowocował powastniem całej rodziny architektur wyspecjalizowanych w równoległym wykonywaniu tego typu zadań. W efekcie karty te zostały wyposażone w środowiska programistyczne dające możliwość wykonywania obliczeń o ogólnym charakterze. Jednym z takich rozwiązań jest CUDA (ang. Compute Unified Device Architecture) - standard opracowany przez firmie NVidia. 
+	Aktualnie karty graficzne posiadają setki rdzeni i bardzo szybką pamięć co pozwala przy odpowiednio napisanym algorytmie uzyskanie bardzo dużego przyspieszenia. Widać to na przykład w przypadku łamania haseł, dzięki obliczeniom na karcie graficzne czas metody bruteforce bardzo się skraca. 
 \begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
-  \includegraphics[width=0.8\textwidth]{images/cuda.png}
+  \includegraphics[width=1.0\textwidth]{images/cuda.png}
   \end{center}
-  \caption{Porównanie progamu sekewncyjnego z równoległy }
+  \caption{Porównanie progamu sekewncyjnego z równoległego napisanego w standardzie CUDA - przykład szkoleniowy z materiałów firmy NVidia}
  \end{figure}
- Przyspieszenie to nie jest tak łatwe do uzyskania jak przykładowo w OpenMP gdzie stosuje się dyrektywy. Aby uzyskać znaczne przyszpiesznie na kartach graficznych należy odpowiednio przygotować algortym. W przypadku uruchamiania go na GPU kod kernela(pojedynczej funkcji) wykonywany jest przez setki wątków. Ważne jest też używanie szybkiej pamięci karty.
+ Przyspieszenie to nie jest tak łatwe do uzyskania jak przykładowo w OpenMP gdzie stosuje się dyrektywy. Aby uzyskać znaczne przyszpiesznie na kartach graficznych należy odpowiednio przygotować algortym. W przypadku uruchamiania go na GPU kod kernela (pojedynczej funkcji) wykonywany jest przez setki wątków. Jest to realizacja obliczeń typu SIMD z taksonomii Flyna. 
 
 \section*{Model zwrónoleglenia Algorytmu Smitha-Watermana}
 Zazwyczaj w algorytmach równoległych operujących na macierzach następuje podział obszarów w jenden z poniższych sposobów. 
@@ -323,17 +322,28 @@ Ze względu na wspomniane zależności przy zrównoleglaniu algorytmu Smitha-Wat
   \caption{Prawidłowy model zrównoleglania algorytmu Smitha-Watermana}
  \end{figure}
 
-Jak widać taki podział umożliwia wielu wątkom wykonywanie opracji na swoich komórkach bez obawy o zależności. 
+Jak widać taki podział umożliwia wielu wątkom wykonywanie operacji na swoich komórkach bez obawy o zależności. 
+
+Dodatkowo w celu zaoszczedzenia pamięci można posłyżyć się dodatkowym udoskonaleniem. Można zauważyć, że w celu obliczenia wartości komórek z n-tej przekątnej potrzebne są wartości z n-1 oraz n-2 przekątnej. Wczęsniejsze komórki nie muszę być przechowywane. Rysunek 13. przedstawia w ten sposób oszczędności pamięci.
+
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.6\textwidth]{images/OszczednoscPamieciPrzyZrownolegleniu.png}
+  \end{center}
+  \caption{Metoda oszczędności pamięci przy wykonaniu algorytmu Smitha-Watermana}
+ \end{figure}
 
 
-\section*{Wnioski}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sed velit nec nibh varius suscipit. Curabitur nisi purus, porttitor in urna ut, tincidunt aliquam leo. Integer sit amet nisi egestas, congue tellus nec, gravida tellus. Nulla facilisi. Quisque ultrices sem sed arcu mattis, in eleifend lectus imperdiet. Donec ullamcorper cursus tortor, in interdum sem imperdiet non. Aliquam sit amet viverra nisl, vitae ullamcorper dolor. Pellentesque varius ex a urna blandit, ac volutpat sapien feugiat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla posuere ligula ligula, ut ullamcorper nulla tempor vitae.
+\section*{Obliczenia i wnioski}
+Implementacja z wykorzystaniem technologii narzuca dodatkowe wymagania związane z
+\begin{lista}
+\item prawidłową komunikacji między hostem a kartą graficzną
+\item prawidłowym rozmieszczeniem danych w stosownych obszarach pamięci
+\end{lista} 
 
-Vestibulum faucibus ex dolor, non suscipit enim sagittis eget. Cras et condimentum elit. Integer porta, quam ac posuere efficitur, magna mauris finibus nisi, at egestas augue diam sed risus. Ut nec nisi quis nunc sagittis volutpat at viverra eros. Donec ut porttitor orci. Mauris eget eleifend neque, id condimentum tortor. Nunc lobortis quam mi, aliquet varius dolor tempus non. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam sed auctor ex. Praesent tempus ipsum sit amet eros tempus, id ornare nulla vulputate. Nullam lobortis mi leo, ac tincidunt est volutpat dapibus. Pellentesque faucibus maximus suscipit. Duis vitae turpis in nisi condimentum finibus quis a arcu. Donec magna massa, elementum rutrum ligula at, dignissim blandit sem. Vivamus est nisl, aliquam ac tellus ac, egestas consectetur erat. Morbi commodo dui non ipsum vehicula dapibus.
-
-
+Efektywne wy
 
 
 
