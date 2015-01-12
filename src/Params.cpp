@@ -33,8 +33,9 @@ bool Params::parse(int argc, char **argv) {
         printUsage();
         return 0;
     }
-    if (argc > 4) {
+    if (argc > 3) {
         Params::threads_per_block = std::atoi(argv[3]);
+        std::cout<<"Threads per block: "<<Params::threads_per_block<<std::endl;
     }
     std::ifstream file(argv[1]);
     if (!file.is_open()) {

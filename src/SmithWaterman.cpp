@@ -56,7 +56,7 @@ SmithWaterman::SmithWaterman(Params &params)
     m_cudaParams.cuda.mismatch = Params::mismatch;
     m_cudaParams.cuda.gap_penalty = Params::gapPenalty;
 
-    m_cudaParams.cuda.cells_per_thread = 24;
+    m_cudaParams.cuda.cells_per_thread = 64;
     m_cudaParams.cuda.threads_per_block = Params::threads_per_block;
     m_cudaParams.cuda.threads_count = ceil((float)m_size_y / (float)m_cudaParams.cuda.cells_per_thread);
     m_cudaParams.cuda.blocks_count = ceil((float)m_cudaParams.cuda.threads_count / (float)m_cudaParams.cuda.threads_per_block);
@@ -285,11 +285,11 @@ void SmithWaterman::print(){
     std::cout << "Size of #2: " << m_sequence2.size << std::endl;
 
     std::cout << "Finded path: " << m_paths.size() << std::endl;
-    std::cout << "Time: " << m_duration << "ms" << std::endl;
+    std::cout << "Time: " << m_duration << " ms" << std::endl;
 
     std::cout << std::endl;
 
-    // std::cout << m_result << std::endl;
+    std::cout << m_result << std::endl;
 }
 
 
