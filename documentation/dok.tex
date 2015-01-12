@@ -15,6 +15,8 @@
 \usepackage{wrapfig}
 \usepackage{listings}
 \usepackage{datetime}
+\usepackage{titlesec}
+\usepackage{float}
 \renewcommand{\onehalfspacing}{\setstretch{1.6}}
 \geometry{tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
 \setlength{\parindent}{1cm}
@@ -25,6 +27,7 @@
   \setlength{\parskip}{0pt}
   \setlength{\parsep}{0pt}
 }{\end{itemize}}
+\titleformat{\section}[block]{\bfseries}{}{1em}{}
 \newcommand{\linia}{\rule{\linewidth}{0.4mm}}
 \definecolor{lbcolor}{rgb}{0.95,0.95,0.95}
 \lstset{
@@ -47,38 +50,331 @@
   }
 \begin{document}
 \noindent
-\begin{tabular}{|c|p{11cm}|c|} \hline 
-Grupa Wtorek 9.15 & Michał Jaworek Marcin Kaciuba & \ddmmyyyydate\today \tabularnewline
-\hline 
-\end{tabular}
 
 
-\section*{Algorytm Smitha-Watermana - poszukiwanie optymalnych lokalnych dopasowań sekwencji }
 
-\section*{Algorytm Smitha-Watermana }
-Algorytm bazujący na programowaniu dynamicznym umożliwiający poszukiwanie optymalnych lokalnych dopasowań sekwencji.
-Jest często wykorzystywany w bioinformatyce do poszukiwań dopasowań sekwencji nukleotydów i aminokwasów.
+\title{Algorytm Smitha-Watermana - poszukiwanie optymalnych lokalnych dopasowań sekwencji }
+\author{Michał Jaworek, Marcin Kaciuba\\ Politechnika Krakowska}
+\maketitle
 
-\begin{figure}[h]
+
+
+\section*{Abstrakt}
+Algorytmy dopasowania sekwencji polega na określaniu stopnia podobieństwa dwóch ciągów. Znajduje on swoje zastosowanie m. in. w bioinformatyce do poszukiwań dopasowań sekwencji nukleotydów i aminokwasów. Algorytm Smitha-Watermana rozwiązuje jeden rodzaj problemów tego typu - tzw. dopasowanie lokalne. W poniższym dokumencie przedstawiono opis algorytmu i jego zrównoleglenia z wykorzystaniem technologii CUDA. 
+
+\section*{Przedostawienie problemu}
+
+Problem dopasowania sekwencji przyjmuje na wejściu dwa ciągi znaków. W ogólnym przypadku, ciągi te mogą składać się z liter dowolnego alfabetu. W przypadku zastosowań bioinformatyczych zazwyczaj ten alfabet jest relatywnie niewielki (np. czteroznakowy "TGAC"). 
+
+Problem tej klasy można interpretować na dwa sposoby. Istnieją rozwiązania analizujące:
+\begin{lista}
+ \item dopasowanie globalne
+\item dopasowanie lokalne
+\end{lista}
+
+W przypadku dopasowania globalnego dwa ciągi porównywane są wzdłuż całej sekwencji. Takie rozwiązanie jest wykorzystywane przy analizie jednodomenowych białek. Algorytmem tego typu jest na przykład algorytm Needlemana-Wunscha. Schemat takiego dopasowania przedstawiono poniżej: 
+
+\begin{figure}[H]
   \vspace{5pt}
   \centering
   \begin{center}
-  \includegraphics[width=0.65\textwidth]{documentation/images/global-local-alignment.png}
+  \includegraphics[width=0.5\textwidth]{images/Dopasowanie_globalne.png}
   \end{center}
-  \caption{Dopasowanie lokalne a globalne}
+  \caption{Schemat dopasowania globalnego}
  \end{figure}
-Trochę o samym algorytmie... 
+  
 
-\section*{Implementacja algorytmu na GPU}
-...
+Lokalny typ dopasowania polega na rozszerzeniu możliwości algorytmów pierwszego typu o zdolność do zauważenia podobieństw w małych obaszarach. Dla przykładu pewne sekwencje mogą być zamienione kolejnością. Ten typ rozwiązania znajduje zastosowanie w analizowaniu białek wielodomenowych.  Poniżej przedstawiono schemat dopasowania tego typu. 
 
-\section*{Przeprowadzone testy}
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.5\textwidth]{images/Dopasowanie_lokalne.png}
+  \end{center}
+  \caption{Schemat dopasowania lokalnego}
+ \end{figure}
+ 
+ 
+Dla uwidocznienia różnicy w działaniu tych dwóch typów algorytmów posłużmy się przykładem następujących ciągów:
+\begin{lista}
+ \item TGGAACCA
+\item ACCATGGA
+\end{lista}
 
-\section*{Wnioski}
+Powyższa sekwencja składa się z dwóch czteroliterowych sekwencji umieszczony w różnej kolejności. Poniżej przedstawiono macierze podobieństawa uzyskane przez oba algorytmy wraz ze znalozionymi rozwiązaniami. Proces powstawania macierzy tego typu zostanie opisany w dalszej częście tego dokumentu. 
 
 
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=1.0\textwidth]{images/Globalne_lokalne_przyklad.png}
+  \end{center}
+  \caption{Przykład różnicy w działaniu dopasowania globalnego (po lewo) i dopasowania lokalnego (po prawo)}
+ \end{figure}
 
 
+W przypadku globalnego dopasowania najlepszy uzyskany wynik jest jeden. Algorytm uzaje, że za najpesze dopasowanie należy uznać następującą interpretacje: 
+\begin{lista}
+ \item Pierwszy znak został podmieniony
+\item Natępnie brakuje 4 znaków w drugim ciągu
+\item Kolejne dwa znaki pasują do siebie
+\item Natępnie brakuje 4 znaków w pierwszym ciągu
+\item Ostatnie znaki pasują do siebie
+\end{lista}
 
+Jak widać, takie rozwiązanie nie jest w stanie wykryć istoty zadanego przykładu. Dla odmiany dopasowanie lokalne nie narzuca jednego najlepszego rozwiązania. Po zbudowaniu macierzy podobieństwa możemy zauważyć, że istnieją dwie ścieżki punktowane w ten sam sposób. Jedna z nich repreztuje informacje o znalezieniu dopasowania podciągów ACCA, druga o znalezieniu dopasowania podciągów TGGA. W przypadku dużych ciągów wejściowych powyższe macierze reprezentuje się w odmienny sposób. Przyjmując pewną wartość progową można utworzyć wykres tego typu:
+
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.4\textwidth]{images/macierz.png}
+  \end{center}
+  \caption{Przykład wizualnej reprezentacji macierzy podobieństwa dla algorytmu dopasowania lokalnego}
+\end{figure}
+
+Dzięki takiemu przedstawieniu wyników możliwe jest zwrócenie uwagi na fragmenty zawierające istotne podobieństwo. 
+
+
+\section*{Algorytm Smitha-Watermana w ujęciu sekwencyjnym}
+
+Algorym Smitha-Watermana należy do klasy algorytmów dynamicznych. Składa się z się z dwóch etapów:
+\begin{lista}
+ \item Tworzenie macierzy podobieństwa
+\item Otwarzanie optymalnej ścieżki (ang. backtracking)
+\end{lista}
+
+W pierwszym etapie zostaje utworzona pusta macierz. Jej wiersze odpowiadają kolejnym znakom pierwszego ciągu, kolumny kolejnym znakom drugiego ciągu. Komórki znajdujące się na przecięcie opisują punktacje określającą w jakim stopniu dopasowanie danych dwóch znaków jest poprawne. 
+
+W celu wypełnienia powyższej macierzy należy zauwazyć, że przy porównywaniu dwóch ciągów można mieć miesce trzy sytuacje przedstawione na poższym schemacie.
+
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.5\textwidth]{images/TypySytuacjiPrzyDopasowaniu.png}
+  \end{center}
+  \caption{Możliwe sytacje w trakcie porównywania ciągów: (1 - dopasowanie, 2 - przerwa, 3 - zamiana)}
+ \end{figure}
+
+
+Dwa ciągi są do siebie podobne gdy mamy więcej sytuacji typu 1 (dopasowanie) niż sytuacji typów 2 (przerwa), 3 (zamiana). W związku z tym spostrzeżeniem w trakcie wypełniania macierzy wartościami będziemy dodatnio punktować dopasowania, podczas gdy przerwy i zamiany będę punktowane ujemnie. Dokładne wartości punktacji nie są elementem specyfikacji algorytmu i są dobierane w zależności od rozpatrywanego problemu. Daje to możliwość porównywania ciągów w sposób traktujący przerwy mniej restrykcyjnie niż zamiany (lub odrotnie). 
+
+W celu opisu kroków algorytmy posłużono się przykładem. Schemat przedstawiony na rysunku 6. prezentuje pierwsze kroki wykonywane w celu wypełnienia macierzy podobieństwa. Przedstawiono przypadek dla danych wejściowych: TGGA, TGA oraz dla parametrów:
+\begin{lista}
+\item Punktacja za dopasowanie: 5
+\item Punktacja za zamiane: -3
+\item Punktacja za przerwe: -2
+\end{lista}
+
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.6\textwidth]{images/SchematDzialaniaAlgorytmu.png}
+  \end{center}
+  \caption{Pierwsze cztery kroki wykonaniu algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
+ \end{figure}
+
+Na początku macierz wypełniona jest zerami. Należy zwrócić uwagę na istnienie dodatkowego wiersza i kolumny (oznaczone na schematach szarą czcionką). Komórki rozpatrywane są wiersz po wierszu. Dla każdej komórki wykonywana jest sekwencja kroków mająca odpowiedzieć na następujące pytanie: "Przez którego z sąsiadów należy poprowadzić ścieżkę dopasowania tak, żeby w obecnej komórce osiągnąć najlepszy wyniki?". Przy odpowiedzi na to pytanie rozpatrywane są komórki:
+\begin{lista}
+\item Na lewo - odpowiadająca wprowadzeniu przerwy w pierwszym ciągu
+\item Powyżej - odpowiadająca wprowadzeniu przerwy w drugim ciągu
+\item Na skos (powyżej i na lewo) - w zależności od przypadku odpowiadająca wprowadzeniu zamiany lub dopasowania.
+\end{lista}
+
+Tą procedurę można przedstawić w pseudokodzie w następujący sposób. 
+
+\begin{lstlisting}
+	int fromLeft = valueOfCellOnLeft - penaltyForGap;
+	int fromUp = valueOfCellOnUp - penaltyForGap;
+	int fromDiagonal;
+	if(letterInRow == letterInCol){
+		fromDiagonal = valueOfCellInDiagonal + bonusOfMatch;
+	}else{
+		fromDiagonal = valueOfCellInDiagonal + penaltyForReplacement;
+	}
+	int	valueOfThisCell = max(fromLeft, fromUp, fromDiagonal);
+	rememberDecision();
+\end{lstlisting}
+
+Prześledźmy kolejne kroki wykonania przykładu z rysunku 6. Warto przy tej okazji zwrócić uwagę na fakt, że w algorytmie Smitha-Watermana celowo unika się wprowadzania do macierzy ujemnych wartości. Względu na to w poniższym opisie zastosowano znak $\simeq$ wszędzie tam, gdzie zamiast wartości ujemnej podstawiane jest 0.
+
+W kroku 1:
+\begin{lista}
+\item Wybranie drogi z lewej strony dawałoby: 0 + (-2) $\simeq$ 0
+\item Wybranie drogi z góry dawałoby : 0 + (-2) $\simeq$ 0
+\item Ze względu na to, że litery w kolumnach (T) i rzędach (T) są takie same przejście na skos dawałoby: 0 + 5 = 5
+\item Najbardziej opłacalnym ruchem jest przejście na skos więc zapamiętujemy ten ruch i nadajemy komórce wartość 5
+\end{lista}
+
+W kroku 2:
+\begin{lista}
+\item Wybranie drogi z lewej strony dawałoby: 5 + (-2) = 3
+\item Wybranie drogi z góry dawałoby : 0 + (-2) $\simeq$ 0
+\item Ze względu na to, że litery w kolumnach (G) i rzędach (T) niesą takie same na skos dawałoby: 0 + (-3) $\simeq$ 0
+\item Najbardziej opłacalnym ruchem jest przejście z lewej strony więc zapamiętujemy ten ruch i nadajemy komórce wartość 3
+\end{lista}
+
+W kroku 3:
+\begin{lista}
+\item Wybranie drogi z lewej strony dawałoby: 3 + (-2) = 1
+\item Wybranie drogi z góry dawałoby : 0 + (-2) $\simeq$ 0
+\item Ze względu na to, że litery w kolumnach (G) i rzędach (T) niesą takie same na skos dawałoby: 0 + (-3) $\simeq$ 0
+\item Najbardziej opłacalnym ruchem jest przejście z lewej strony więc zapamiętujemy ten ruch i nadajemy komórce wartość 1
+\end{lista}
+
+W kroku 4:
+\begin{lista}
+\item Wybranie drogi z lewej strony dawałoby: 1 + (-2) $\simeq$ 0
+\item Wybranie drogi z góry dawałoby : 0 + (-2) $\simeq$ 0
+\item Ze względu na to, że litery w kolumnach (A) i rzędach (T) niesą takie same na skos dawałoby: 0 + (-3) $\simeq$ 0
+\item W tym momencie wszystkie drogi dają taką samą wartośc nie zapamiętujemy kierunku i nadajemy komórce wartość 0.
+\end{lista}
+
+
+Po wykonaniu analogicznych kroków dla wszystkich komórek macierzy otrzymamy następujący stan:
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.4\textwidth]{images/SchematDzialaniaAlgorytmuPelnaMacierz.png}
+  \end{center}
+  \caption{Całkowicie wypełniona macierz dopasowania algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
+ \end{figure}
+
+
+W tym momencie macierz jest gotowa do wykonania drugiej fazy - backtrackingu. Polega ona na znalezieniu maksymalnej komórki i zapisaniu wszystkich kroków, które doprowadziły to ustalenie jej wartości. Poniżej przedstawiono macierz z nasiesioną ścieżką metodą backtrackingu. 
+
+Po wykonaniu analogicznych kroków dla wszystkich komórek macierzy otrzymamy stan przedstawiony na rysunku 8.
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.4\textwidth]{images/SchematDzialaniaAlgorytmuPelnaMacierzBacktracking.png}
+  \end{center}
+  \caption{Backtracking dla algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
+ \end{figure}
+
+W efekcie uzyskany wyniki to: [$\nwarrow, \leftarrow, \nwarrow, , \nwarrow$] co należy odczytać jako: [dopasowanie, przerwa, dopasowanie, dopasowanie]. 
+Odpowiada do dopasowaniu przedstawionym na rysunku 9. 
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.1\textwidth]{images/uzyskaneDopasowanie.png}
+  \end{center}
+  \caption{Wynika dziłania algorytmu Smitha-Watermana dla danych wejściowych: TGGA, TGA}
+ \end{figure}
+
+\section*{Zarys technologii CUDA}
+W ostatnich latach zwiększanie wyników CPU przez zwiększanie częstotliwości zegara przestało być skutenczne. Zaczęto szukać rozwiązań polegających na zwiększaniu liczby rdzeni działających równolegle. W przypadku procesorów trend ten jest utrzymywany, jednak zauważono, że znaczące polepszenie wyników można także uzyskać stosując karty graficzne. Potokowy charakter obliczeń graficznych zaowocował powastniem całej rodziny architektur wyspecjalizowanych w równoległym wykonywaniu tego typu zadań. W efekcie karty te zostały wyposażone w środowiska programistyczne dające możliwość wykonywania obliczeń o ogólnym charakterze. Jednym z takich rozwiązań jest CUDA (ang. Compute Unified Device Architecture) - standard opracowany przez firmie NVidia. 
+	Aktualnie karty graficzne posiadają setki rdzeni i bardzo szybką pamięć co pozwala przy odpowiednio napisanym algorytmie uzyskanie bardzo dużego przyspieszenia. Widać to na przykład w przypadku łamania haseł, dzięki obliczeniom na karcie graficzne czas metody bruteforce bardzo się skraca. 
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=1.0\textwidth]{images/cuda.png}
+  \end{center}
+  \caption{Porównanie progamu sekewncyjnego z równoległego napisanego w standardzie CUDA - przykład szkoleniowy z materiałów firmy NVidia}
+ \end{figure}
+ Przyspieszenie to nie jest tak łatwe do uzyskania jak przykładowo w OpenMP gdzie stosuje się dyrektywy. Aby uzyskać znaczne przyszpiesznie na kartach graficznych należy odpowiednio przygotować algortym. W przypadku uruchamiania go na GPU kod kernela (pojedynczej funkcji) wykonywany jest przez setki wątków. Jest to realizacja obliczeń typu SIMD z taksonomii Flyna. 
+
+\section*{Model zwrónoleglenia Algorytmu Smitha-Watermana}
+Zazwyczaj w algorytmach równoległych operujących na macierzach następuje podział obszarów w jeden z poniższych sposobów. 
+\begin{lista}
+\item Każdy wątek dostaję jedną kolumne lub jeden wiersz
+\item Każdy wątek dostaje jedną komórkę w kolumnie
+\item Każdy wątek dostaje jedną komórkę w wierszu
+\end{lista}
+
+Żaden z powyższych modeli nie nadaje się do zrównoleglenia algorytmu Smitha-Watermana. Wynika to z zależności, które zostały symbolicznie przedstawione na rysynku 11.
+
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.6\textwidth]{images/ZleModeleZrownoleglenia.png}
+  \end{center}
+  \caption{Zależności występujące między komórkami w trakcie obliczeń algorytmu Smitha-Watermana}
+ \end{figure}
+
+
+Na rysunkach 11, 12 przyjęto następujące oznaczenia: 
+\begin{lista}
+\item komórki szare posiadają obliczoną wartość.
+\item komórki zielone mogą być obliczane bez zależności
+\item komórki pomarańczowe są zależne od wartości innych komórek
+\item komórki białe będę rozpatrywana w przyszłości
+\end{lista} 
+
+Ze względu na wspomniane zależności przy zrównoleglaniu algorytmu Smitha-Watermana stosuje się model polegający na podziale komórek należących do tych samych przekątnych. Schemat tego podziału przedstawia rysunek 12.
+
+
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.2\textwidth]{images/DobryModelZrownoleglenia.png}
+  \end{center}
+  \caption{Prawidłowy model zrównoleglania algorytmu Smitha-Watermana}
+ \end{figure}
+
+Jak widać taki podział umożliwia wielu wątkom wykonywanie operacji na swoich komórkach bez obawy o zależności. 
+
+Dodatkowo w celu zaoszczedzenia pamięci można posłyżyć się kolejnym udoskonaleniem. Można zauważyć, że w celu obliczenia wartości komórek z n-tej przekątnej potrzebne są wartości z n-1 oraz n-2 przekątnej. Wczęsniejsze komórki nie muszę być przechowywane. Rysunek 13. przedstawia w ten sposób oszczędności pamięci.
+
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.6\textwidth]{images/OszczednoscPamieciPrzyZrownolegleniu.png}
+  \end{center}
+  \caption{Metoda oszczędności pamięci przy wykonaniu algorytmu Smitha-Watermana}
+ \end{figure}
+
+
+\section*{Obliczenia i wnioski}
+Dokonano prób implementacji powyżej opisanej metody. Wykorzystano sprzęt NVIDIA GeForce GT 430 z zestawem zeweloperskim CUDA SDK w wersji 6.0. 
+
+Implementacja z wykorzystaniem technologii narzuca dodatkowe wymagania związane z
+\begin{lista}
+\item prawidłową komunikacji między hostem a kartą graficzną
+\item prawidłowym rozmieszczeniem danych w stosownych obszarach pamięci
+\end{lista} 
+
+Realizacja zadania przebiegła pomyślnie tylko częściowo. Algorytm został przenisiony na kod standardu CUDA i zwraca prawidłowe wyniki. Napotkano problemy z wydajnością. Algotyrm przyspiesza w niewielkim stopniu. Poniżej przesdawiono wykres przspieszenia wyliczony z wzoru $S_{p} = \dfrac{t_{1}}{t_{\parallel}}$
+
+\begin{figure}[H]
+  \vspace{5pt}
+  \centering
+  \begin{center}
+  \includegraphics[width=0.6\textwidth]{images/wykres.png}
+  \end{center}
+  \caption{Przyspieszenie względne uzyskane przez program}
+ \end{figure}
+ 
+ 
+ Powyższe wyniki zostały uzyskane przez program uruchamiany dla danych wejsciowych odpowiednio 13072 oraz 12960 znakowych. Prawdopodobnie kluczowym problemem przy zrównoleglaniu algorymu jest liczne występowanie instrukcji warunkowych w trakcie obliczania punktacji komórek. Nie udało się znaleźć metody zastąpienia instrukcji if innymi instrukcjami nie zaburzającymi przyspieszenia.
+
+
+\begin{thebibliography}{9}
+
+\bibitem{lamport94}
+  Łukasz Ligowski,Witold Rudnicki
+  \emph{An efficien implementation of Smith-Waterman algorithm on GPU using CUDA, for massively parallel scanning of sequence databases.}
+  
+\bibitem{lamport94}
+  E. Banachowicz
+  \emph{Bioinformatyka - wykład monograficzny}
+  
+\bibitem{lamport94}
+  A. Skowron
+  \emph{http://opal.przyjaznycms.pl}
+
+
+\end{thebibliography}
 
 \end{document}
